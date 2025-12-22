@@ -19,10 +19,9 @@ def cek_model_tersedia():
         
         model_ditemukan = False
         # Melakukan iterasi pada semua model yang dikembalikan oleh API
-        for model in client.models.list()[:5]:
+        for model in client.models.list():
             # Memeriksa apakah 'generateContent' ada di dalam daftar 'supported_actions'
             # Ini adalah perbaikan dari kode sebelumnya
-            print(model)
             if 'generateContent' in model.supported_actions:
                 print(f"✅ Nama Model: {model.name}")
                 model_ditemukan = True
