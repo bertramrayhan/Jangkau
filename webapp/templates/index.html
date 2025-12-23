@@ -42,16 +42,6 @@
             {% for lomba in list_lomba %}
                 <article class="bg-white rounded-lg shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full cursor-pointer group">
                     <div class="p-5 flex flex-col flex-1 gap-3">
-                        <div class="flex justify-between items-start">
-                            <div class="flex flex-wrap gap-2 mb-1">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                    UI/UX Design
-                                </span>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                    Online
-                                </span>
-                            </div>
-                        </div>
                         <div>
                             <h3 class="text-lg font-bold text-primary group-hover:text-[#12542b] leading-tight mb-1">
                                 {{ lomba.title }}
@@ -68,194 +58,22 @@
                                 <span>Lokasi: {{ lomba.location_details or "-" }} </span>
                             </div>
                         </div>
+                        <div class="flex justify-between items-start">
+                            <div class="flex flex-wrap gap-2 mb-1">
+                                {% for tag in lomba.tags %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        {{ tag.name }}
+                                    </span>
+                                {% endfor %}
+
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                    {{ lomba.location }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </article>
             {% endfor %}
-            {# <article class="bg-white rounded-lg shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full cursor-pointer group">
-                <div class="p-5 flex flex-col flex-1 gap-3">
-                    <div class="flex justify-between items-start">
-                        <div class="flex flex-wrap gap-2 mb-1">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                UI/UX Design
-                            </span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                Online
-                            </span>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-primary group-hover:text-[#12542b] leading-tight mb-1">
-                            National UI/UX Challenge 2025
-                        </h3>
-                        <p class="text-sm text-medium-gray font-medium">Himpunan Mahasiswa Informatika ITB</p>
-                    </div>
-                    <div class="mt-auto pt-4 flex flex-col gap-2 border-t border-gray-50">
-                        <div class="flex items-center gap-2 text-sm text-medium-gray">
-                            <span class="material-symbols-outlined text-[18px] text-primary">event</span>
-                            <span>Batas: 20 Okt 2025</span>
-                        </div>
-                        <div class="flex items-center gap-2 text-sm text-medium-gray">
-                            <span class="material-symbols-outlined text-[18px] text-primary">location_on</span>
-                            <span>Lokasi: Zoom Meeting</span>
-                        </div>
-                    </div>
-                </div>
-            </article>
-            <!-- Card 2 -->
-            <article class="bg-white rounded-lg shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full cursor-pointer group">
-                <div class="p-5 flex flex-col flex-1 gap-3">
-                    <div class="flex justify-between items-start">
-                        <div class="flex flex-wrap gap-2 mb-1">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                Business Case
-                            </span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                Tim
-                            </span>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-primary group-hover:text-[#12542b] leading-tight mb-1">
-                            Business Innovation Summit
-                        </h3>
-                        <p class="text-sm text-medium-gray font-medium">Universitas Indonesia</p>
-                    </div>
-                    <div class="mt-auto pt-4 flex flex-col gap-2 border-t border-gray-50">
-                        <div class="flex items-center gap-2 text-sm text-medium-gray">
-                            <span class="material-symbols-outlined text-[18px] text-primary">event</span>
-                            <span>Batas: 15 Nov 2025</span>
-                        </div>
-                        <div class="flex items-center gap-2 text-sm text-medium-gray">
-                            <span class="material-symbols-outlined text-[18px] text-primary">location_on</span>
-                            <span>Lokasi: Jakarta (Hybrid)</span>
-                        </div>
-                    </div>
-                </div>
-            </article>
-            <!-- Card 3 -->
-            <article class="bg-white rounded-lg shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full cursor-pointer group">
-                <div class="p-5 flex flex-col flex-1 gap-3">
-                    <div class="flex justify-between items-start">
-                        <div class="flex flex-wrap gap-2 mb-1">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                Programming
-                            </span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                Gratis
-                            </span>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-primary group-hover:text-[#12542b] leading-tight mb-1">
-                            Gemastik 2025: Divisi CP
-                        </h3>
-                        <p class="text-sm text-medium-gray font-medium">Puspresnas Kemendikbud</p>
-                    </div>
-                    <div class="mt-auto pt-4 flex flex-col gap-2 border-t border-gray-50">
-                        <div class="flex items-center gap-2 text-sm text-medium-gray">
-                            <span class="material-symbols-outlined text-[18px] text-primary">event</span>
-                            <span>Batas: 01 Sep 2025</span>
-                        </div>
-                        <div class="flex items-center gap-2 text-sm text-medium-gray">
-                            <span class="material-symbols-outlined text-[18px] text-primary">location_on</span>
-                            <span>Lokasi: Online</span>
-                        </div>
-                    </div>
-                </div>
-            </article>
-            <!-- Card 4 -->
-            <article class="bg-white rounded-lg shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full cursor-pointer group">
-                <div class="p-5 flex flex-col flex-1 gap-3">
-                    <div class="flex justify-between items-start">
-                        <div class="flex flex-wrap gap-2 mb-1">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                Fotografi
-                            </span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                Umum
-                            </span>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-primary group-hover:text-[#12542b] leading-tight mb-1">
-                            Lensa Nusantara Photo Contest
-                        </h3>
-                        <p class="text-sm text-medium-gray font-medium">Komunitas Fotografi Jogja</p>
-                    </div>
-                    <div class="mt-auto pt-4 flex flex-col gap-2 border-t border-gray-50">
-                        <div class="flex items-center gap-2 text-sm text-medium-gray">
-                            <span class="material-symbols-outlined text-[18px] text-primary">event</span>
-                            <span>Batas: 30 Nov 2025</span>
-                        </div>
-                        <div class="flex items-center gap-2 text-sm text-medium-gray">
-                            <span class="material-symbols-outlined text-[18px] text-primary">location_on</span>
-                            <span>Lokasi: Online Submission</span>
-                        </div>
-                    </div>
-                </div>
-            </article>
-            <!-- Card 5 -->
-            <article class="bg-white rounded-lg shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full cursor-pointer group">
-                <div class="p-5 flex flex-col flex-1 gap-3">
-                    <div class="flex justify-between items-start">
-                        <div class="flex flex-wrap gap-2 mb-1">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                Essay
-                            </span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                Nasional
-                            </span>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-primary group-hover:text-[#12542b] leading-tight mb-1">
-                            Lomba Esai Mahasiswa Nasional
-                        </h3>
-                        <p class="text-sm text-medium-gray font-medium">BEM Universitas Brawijaya</p>
-                    </div>
-                    <div class="mt-auto pt-4 flex flex-col gap-2 border-t border-gray-50">
-                        <div class="flex items-center gap-2 text-sm text-medium-gray">
-                            <span class="material-symbols-outlined text-[18px] text-primary">event</span>
-                            <span>Batas: 12 Des 2025</span>
-                        </div>
-                        <div class="flex items-center gap-2 text-sm text-medium-gray">
-                            <span class="material-symbols-outlined text-[18px] text-primary">location_on</span>
-                            <span>Lokasi: Malang</span>
-                        </div>
-                    </div>
-                </div>
-            </article>
-            <!-- Card 6 -->
-            <article class="bg-white rounded-lg shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full cursor-pointer group">
-                <div class="p-5 flex flex-col flex-1 gap-3">
-                    <div class="flex justify-between items-start">
-                        <div class="flex flex-wrap gap-2 mb-1">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                Hackathon
-                            </span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                24 Jam
-                            </span>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-primary group-hover:text-[#12542b] leading-tight mb-1">
-                            HackJakarta 2025
-                        </h3>
-                        <p class="text-sm text-medium-gray font-medium">Startup Indo Community</p>
-                    </div>
-                    <div class="mt-auto pt-4 flex flex-col gap-2 border-t border-gray-50">
-                        <div class="flex items-center gap-2 text-sm text-medium-gray">
-                            <span class="material-symbols-outlined text-[18px] text-primary">event</span>
-                            <span>Batas: 05 Jan 2026</span>
-                        </div>
-                        <div class="flex items-center gap-2 text-sm text-medium-gray">
-                            <span class="material-symbols-outlined text-[18px] text-primary">location_on</span>
-                            <span>Lokasi: Jakarta Selatan</span>
-                        </div>
-                    </div>
-                </div>
-            </article> #}
         </div>
         <!-- Pagination -->
         <div class="flex justify-center items-center gap-4">

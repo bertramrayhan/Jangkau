@@ -1,34 +1,26 @@
-import os, sqlite3
-from flask import Flask, render_template
+from flask import Flask
 from helpers import convert_to_id_date
-
-current_file_path = os.path.abspath(__file__)
-webapp_dir = os.path.dirname(current_file_path)
-PROJECT_ROOT = os.path.dirname(webapp_dir)
-
-DB_PATH = os.path.join(PROJECT_ROOT, 'database', 'jangkau.db')
+from routes import home_bp
+from models import db
+import os
 
 app = Flask(__name__)
 
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+db_path = os.path.join(BASE_DIR, '..', 'database', 'jangkau.db')  # satu level ke atas dari webapp
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app)
+
+with app.app_context():
+    db.create_all()
+
 app.jinja_env.filters["convert_to_id_date"] = convert_to_id_date
 
-def get_db_connection():
-    """Fungsi bantuan untuk membuat koneksi ke database."""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+def register_routes(app):
+    app.register_blueprint(home_bp)
 
-@app.route('/')
-def index():
-    """Route untuk halaman utama."""
-    conn = get_db_connection()
-    
-    list_lomba = conn.execute('SELECT * FROM lomba ORDER BY created_at DESC LIMIT 6').fetchall()
-    
-    conn.close()
-    
-    return render_template('index.html', list_lomba = list_lomba)
-
-# Perintah untuk menjalankan server pengembangan
 if __name__ == '__main__':
+    register_routes(app)
     app.run(debug=True, port=5000)
