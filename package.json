@@ -1,0 +1,21 @@
+{
+  "name": "jangkau",
+  "version": "1.0.0",
+  "description": "<p align=\"center\">   <!-- Kamu bisa membuat logo sederhana nanti dan meletakkan link gambarnya di sini -->   <!-- <img src=\"URL_LOGO_JANGKAU\" alt=\"Logo Jangkau\" width=\"150\"/> --> </p>",
+  "main": "tailwind.config.js",
+  "scripts": {
+    "dev": "npx postcss webapp/static/css/input.css -o webapp/static/css/output.css --watch",
+    "build": "npx postcss webapp/static/css/input.css -o webapp/static/css/output.css --minify",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "autoprefixer": "^10.4.23",
+    "postcss": "^8.5.6",
+    "postcss-cli": "^11.0.1",
+    "tailwindcss": "^4.1.18"
+  }
+}

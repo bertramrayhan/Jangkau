@@ -3,14 +3,17 @@ from google import genai
 from google.genai import types
 import json, os, sqlite3, time, requests, re
 from urllib.parse import quote_plus
+from dotenv import load_dotenv
 
 class JangkauScraper:
     def __init__(self):
+        load_dotenv(dotenv_path='.env')
+
+        self.DB_PATH = os.getenv('DB_PATH')
         self.base_url = 'https://www.infolombait.com/'
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
-        self.DB_NAME = 'database/jangkau.db'
         self.BATCH_SIZE = 5
         self.MAX_PAGE = 5
         self.model_list = [
@@ -35,7 +38,7 @@ class JangkauScraper:
         
         conn = None
         try:
-            conn = sqlite3.connect(self.DB_NAME)
+            conn = sqlite3.connect(self.DB_PATH)
             cursor = conn.cursor()
 
             # --- LANGKAH 1: Masukkan data utama ke tabel 'lomba' ---

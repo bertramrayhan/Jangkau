@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Jangkau - Temukan Lomba Mahasiswa</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#166434",
+                        "accent": "#F59E0B",
+                        "background-light": "#F9FAFB",
+                        "background-dark": "#122017",
+                        "dark-charcoal": "#1F2937",
+                        "medium-gray": "#6B7280",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem", 
+                        "lg": "0.5rem", 
+                        "xl": "0.75rem", 
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light text-dark-charcoal font-display min-h-screen flex flex-col">
+    <!-- Top Navigation -->
+    <nav class="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm w-full">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer">
+                    <div class="text-primary">
+                        <span class="material-symbols-outlined text-3xl">school</span>
+                    </div>
+                    <h1 class="text-primary text-xl font-bold tracking-tight">Jangkau</h1>
+                </div>
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center gap-8">
+                    <a class="text-primary font-semibold text-sm border-b-2 border-primary pb-0.5" href="#">Lomba</a>
+                    <a class="text-dark-charcoal hover:text-primary font-medium text-sm transition-colors" href="#">Tentang Kami</a>
+                </div>
+                <!-- Mobile Menu Button (Placeholder) -->
+                <div class="md:hidden flex items-center">
+                    <button class="text-dark-charcoal hover:text-primary">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- Hero Section -->
+    <section class="w-full bg-background-light py-16 md:py-24 px-4">
+        <div class="max-w-4xl mx-auto text-center flex flex-col items-center gap-6">
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-primary leading-tight tracking-tight">
+                Temukan Peluang <br class="hidden md:block"/> Prestasimu Berikutnya
+            </h1>
+            <p class="text-medium-gray text-base md:text-lg max-w-2xl font-normal leading-relaxed">
+                Satu tempat untuk semua informasi lomba, kompetisi, dan program kreativitas mahasiswa di seluruh Indonesia.
+            </p>
+            <!-- Search Bar -->
+            <div class="w-full max-w-xl mt-4 relative group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span class="material-symbols-outlined text-primary">search</span>
+                </div>
+                <input class="block w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-lg text-dark-charcoal placeholder-gray-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm text-base" placeholder="Cari nama lomba..." type="text"/>
+                <button class="absolute inset-y-2 right-2 bg-primary hover:bg-[#12542b] text-white px-6 rounded-md text-sm font-semibold transition-colors flex items-center">
+                    Cari
+                </button>
+            </div>
+        </div>
+    </section>
+    <!-- Main Content Area -->
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        <!-- Action Bar: Header & Filter -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-gray-100 pb-4">
+            <h2 class="text-2xl font-bold text-dark-charcoal">Lomba Terbaru</h2>
+            <button class="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-lg shadow-sm hover:bg-gray-50 text-dark-charcoal font-medium transition-all group">
+                <div class="bg-gray-100 p-1 rounded-full group-hover:bg-gray-200 transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">filter_list</span>
+                </div>
+                <span>Filter</span>
+            </button>
+        </div>
+        <!-- Competition Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <!-- Card 1 -->
+            <article class="bg-white rounded-lg shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full cursor-pointer group">
+                <div class="p-5 flex flex-col flex-1 gap-3">
+                    <div class="flex justify-between items-start">
+                        <div class="flex flex-wrap gap-2 mb-1">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                UI/UX Design
+                            </span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                Online
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-primary group-hover:text-[#12542b] leading-tight mb-1">
+                            National UI/UX Challenge 2025
+                        </h3>
+                        <p class="text-sm text-medium-gray font-medium">Himpunan Mahasiswa Informatika ITB</p>
+                    </div>
+                    <div class="mt-auto pt-4 flex flex-col gap-2 border-t border-gray-50">
+                        <div class="flex items-center gap-2 text-sm text-medium-gray">
+                            <span class="material-symbols-outlined text-[18px] text-primary">event</span>
+                            <span>Batas: 20 Okt 2025</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-medium-gray">
+                            <span class="material-symbols-outlined text-[18px] text-primary">location_on</span>
+                            <span>Lokasi: Zoom Meeting</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            <!-- Card 2 -->
+            <article class="bg-white rounded-lg shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full cursor-pointer group">
+                <div class="p-5 flex flex-col flex-1 gap-3">
+                    <div class="flex justify-between items-start">
+                        <div class="flex flex-wrap gap-2 mb-1">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                Business Case
+                            </span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                Tim
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-primary group-hover:text-[#12542b] leading-tight mb-1">
+                            Business Innovation Summit
+                        </h3>
+                        <p class="text-sm text-medium-gray font-medium">Universitas Indonesia</p>
+                    </div>
+                    <div class="mt-auto pt-4 flex flex-col gap-2 border-t border-gray-50">
+                        <div class="flex items-center gap-2 text-sm text-medium-gray">
+                            <span class="material-symbols-outlined text-[18px] text-primary">event</span>
+                            <span>Batas: 15 Nov 2025</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-medium-gray">
+                            <span class="material-symbols-outlined text-[18px] text-primary">location_on</span>
+                            <span>Lokasi: Jakarta (Hybrid)</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            <!-- Card 3 -->
+            <article class="bg-white rounded-lg shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full cursor-pointer group">
+                <div class="p-5 flex flex-col flex-1 gap-3">
+                    <div class="flex justify-between items-start">
+                        <div class="flex flex-wrap gap-2 mb-1">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                Programming
+                            </span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                Gratis
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-primary group-hover:text-[#12542b] leading-tight mb-1">
+                            Gemastik 2025: Divisi CP
+                        </h3>
+                        <p class="text-sm text-medium-gray font-medium">Puspresnas Kemendikbud</p>
+                    </div>
+                    <div class="mt-auto pt-4 flex flex-col gap-2 border-t border-gray-50">
+                        <div class="flex items-center gap-2 text-sm text-medium-gray">
+                            <span class="material-symbols-outlined text-[18px] text-primary">event</span>
+                            <span>Batas: 01 Sep 2025</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-medium-gray">
+                            <span class="material-symbols-outlined text-[18px] text-primary">location_on</span>
+                            <span>Lokasi: Online</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            <!-- Card 4 -->
+            <article class="bg-white rounded-lg shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full cursor-pointer group">
+                <div class="p-5 flex flex-col flex-1 gap-3">
+                    <div class="flex justify-between items-start">
+                        <div class="flex flex-wrap gap-2 mb-1">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                Fotografi
+                            </span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                Umum
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-primary group-hover:text-[#12542b] leading-tight mb-1">
+                            Lensa Nusantara Photo Contest
+                        </h3>
+                        <p class="text-sm text-medium-gray font-medium">Komunitas Fotografi Jogja</p>
+                    </div>
+                    <div class="mt-auto pt-4 flex flex-col gap-2 border-t border-gray-50">
+                        <div class="flex items-center gap-2 text-sm text-medium-gray">
+                            <span class="material-symbols-outlined text-[18px] text-primary">event</span>
+                            <span>Batas: 30 Nov 2025</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-medium-gray">
+                            <span class="material-symbols-outlined text-[18px] text-primary">location_on</span>
+                            <span>Lokasi: Online Submission</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            <!-- Card 5 -->
+            <article class="bg-white rounded-lg shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full cursor-pointer group">
+                <div class="p-5 flex flex-col flex-1 gap-3">
+                    <div class="flex justify-between items-start">
+                        <div class="flex flex-wrap gap-2 mb-1">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                Essay
+                            </span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                Nasional
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-primary group-hover:text-[#12542b] leading-tight mb-1">
+                            Lomba Esai Mahasiswa Nasional
+                        </h3>
+                        <p class="text-sm text-medium-gray font-medium">BEM Universitas Brawijaya</p>
+                    </div>
+                    <div class="mt-auto pt-4 flex flex-col gap-2 border-t border-gray-50">
+                        <div class="flex items-center gap-2 text-sm text-medium-gray">
+                            <span class="material-symbols-outlined text-[18px] text-primary">event</span>
+                            <span>Batas: 12 Des 2025</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-medium-gray">
+                            <span class="material-symbols-outlined text-[18px] text-primary">location_on</span>
+                            <span>Lokasi: Malang</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            <!-- Card 6 -->
+            <article class="bg-white rounded-lg shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full cursor-pointer group">
+                <div class="p-5 flex flex-col flex-1 gap-3">
+                    <div class="flex justify-between items-start">
+                        <div class="flex flex-wrap gap-2 mb-1">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                Hackathon
+                            </span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                24 Jam
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-primary group-hover:text-[#12542b] leading-tight mb-1">
+                            HackJakarta 2025
+                        </h3>
+                        <p class="text-sm text-medium-gray font-medium">Startup Indo Community</p>
+                    </div>
+                    <div class="mt-auto pt-4 flex flex-col gap-2 border-t border-gray-50">
+                        <div class="flex items-center gap-2 text-sm text-medium-gray">
+                            <span class="material-symbols-outlined text-[18px] text-primary">event</span>
+                            <span>Batas: 05 Jan 2026</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-medium-gray">
+                            <span class="material-symbols-outlined text-[18px] text-primary">location_on</span>
+                            <span>Lokasi: Jakarta Selatan</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+        <!-- Pagination -->
+        <div class="flex justify-center items-center gap-4">
+            <button class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-dark-charcoal hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                Sebelumnya
+            </button>
+            <span class="text-sm text-medium-gray">Halaman 1 dari 5</span>
+            <button class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-dark-charcoal hover:bg-gray-50">
+                Selanjutnya
+            </button>
+        </div>
+    </main>
+    <!-- Call to Action for Contributors -->
+    <section class="w-full bg-primary text-white py-16 md:py-20 relative overflow-hidden">
+        <!-- Abstract Pattern Background -->
+        <div class="absolute inset-0 opacity-10" data-alt="Abstract subtle dot pattern overlay on green background" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 24px 24px;"></div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center gap-10 md:gap-16">
+            <!-- Icon/Illustration Side -->
+            <div class="flex-shrink-0 bg-white/10 p-8 rounded-full">
+                <span class="material-symbols-outlined text-[64px] md:text-[80px] text-white">handshake</span>
+            </div>
+            <!-- Content Side -->
+            <div class="flex flex-col text-center md:text-left gap-4 max-w-2xl">
+                <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight">
+                    Ayo Bangun Jangkau Bersama
+                </h2>
+                <p class="text-white/90 text-lg leading-relaxed">
+                    Jangkau lahir dari masalah nyata yang kita hadapi sebagai mahasiswa. Jika kamu seorang programmer, desainer, atau punya ide, kontribusimu sangat berarti.
+                </p>
+                <div class="mt-4">
+                    <button class="bg-accent hover:bg-yellow-500 text-dark-charcoal font-bold px-8 py-3.5 rounded-lg transition-colors inline-flex items-center gap-2 shadow-lg">
+                        <span class="material-symbols-outlined">code</span>
+                        Lihat Kode &amp; Mulai Berkontribusi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-sm text-medium-gray">
+                © 2025 Jangkau. All rights reserved.
+            </p>
+            <a class="flex items-center gap-2 text-sm text-medium-gray hover:text-primary transition-colors" href="#">
+                <span class="material-symbols-outlined text-lg">terminal</span>
+                GitHub Repository
+            </a>
+        </div>
+    </footer>
+</body>
+</html>

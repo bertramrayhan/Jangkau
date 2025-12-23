@@ -1,6 +1,10 @@
-import sqlite3
+import sqlite3, os
+from dotenv import load_dotenv
 
-DB_NAME = 'database/jangkau.db'
+load_dotenv(dotenv_path='.env')
+
+DB_PATH = os.getenv('DB_PATH')
+print(DB_PATH)
 
 INITIAL_TAGS = [
     "Programming", "Hackathon", "CTF", "Data Science", "UI/UX Design", 
@@ -9,7 +13,11 @@ INITIAL_TAGS = [
 ]
 
 def create_tables():
-    """Membuat tabel-tabel database jika belum ada."""
+    db_dir = os.path.dirname(DB_PATH)
+    if db_dir and not os.path.exists(db_dir):
+        print(f"📁 Membuat direktori: {db_dir}")
+        os.makedirs(db_dir)
+        os.makedirs(db_dir)
     
     # SQL untuk drop tabel jika sudah ada (dalam urutan yang benar untuk foreign keys)
     sql_drop_lomba_tags_table = "DROP TABLE IF EXISTS lomba_tags;"
@@ -56,8 +64,8 @@ def create_tables():
 
     try:
         # Membuat koneksi ke database
-        conn = sqlite3.connect(DB_NAME)
-        print(f"Berhasil terhubung ke database '{DB_NAME}'")
+        conn = sqlite3.connect(DB_PATH)
+        print(f"Berhasil terhubung ke database '{DB_PATH}'")
         
         # Membuat objek cursor
         cursor = conn.cursor()
