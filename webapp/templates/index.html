@@ -10,17 +10,31 @@
                 Temukan Peluang <br class="hidden md:block"/> Prestasimu Berikutnya
             </h1>
             <p class="text-medium-gray text-base md:text-lg max-w-2xl font-normal leading-relaxed">
-                Satu tempat untuk semua informasi lomba, kompetisi, dan program kreativitas mahasiswa di seluruh Indonesia.
+                Satu tempat untuk semua informasi lomba, beasiswa, dan kompetisi di seluruh Indonesia.
             </p>
             <!-- Search Bar -->
             <div class="w-full max-w-xl mt-4 relative group">
+
                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <span class="material-symbols-outlined text-primary">search</span>
                 </div>
-                <input class="block w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-lg text-dark-charcoal placeholder-gray-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm text-base" placeholder="Cari nama lomba..." type="text"/>
-                <button class="absolute inset-y-2 right-2 bg-primary hover:bg-[#12542b] text-white px-6 rounded-md text-sm font-semibold transition-colors flex items-center">
-                    Cari
-                </button>
+                <input name="q"
+                       id="search-input" 
+                       class="block w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-lg text-dark-charcoal placeholder-gray-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm text-base" 
+                       placeholder="Cari nama lomba..." 
+                       type="search"
+                       value="{{ query or '' }}"
+                       hx-get="{{ url_for('home.index') }}"
+                       hx-target="#lomba-content"
+                       hx-swap="innerHTML"
+                       hx-trigger="keyup changed delay:500ms, search"
+                       hx-indicator="#search-indicator"
+                       hx-push-url="true"/>
+                
+                <!-- Loading indicator -->
+                <div id="search-indicator" class="htmx-indicator absolute right-8 top-1/2 transform -translate-y-1/2">
+                    <div class="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full"></div>
+                </div>
             </div>
         </div>
     </section>
@@ -36,54 +50,8 @@
                 <span>Filter</span>
             </button>
         </div>
-        <!-- Competition Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            <!-- Card 1 -->
-            {% for lomba in list_lomba %}
-                <article class="bg-white rounded-lg shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full cursor-pointer group">
-                    <div class="p-5 flex flex-col flex-1 gap-3">
-                        <div>
-                            <h3 class="text-lg font-bold text-primary group-hover:text-[#12542b] leading-tight mb-1">
-                                {{ lomba.title }}
-                            </h3>
-                            <p class="text-sm text-medium-gray font-medium">{{ lomba.organizer or "-" }}</p>
-                        </div>
-                        <div class="mt-auto pt-4 flex flex-col gap-2 border-t border-gray-50">
-                            <div class="flex items-center gap-2 text-sm text-medium-gray">
-                                <span class="material-symbols-outlined text-[18px] text-primary">event</span>
-                                <span>Batas: {{ lomba.event_start | convert_to_id_date }} </span>
-                            </div>
-                            <div class="flex items-center gap-2 text-sm text-medium-gray">
-                                <span class="material-symbols-outlined text-[18px] text-primary">location_on</span>
-                                <span>Lokasi: {{ lomba.location_details or "-" }} </span>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-start">
-                            <div class="flex flex-wrap gap-2 mb-1">
-                                {% for tag in lomba.tags %}
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                        {{ tag.name }}
-                                    </span>
-                                {% endfor %}
-
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                    {{ lomba.location }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </article>
-            {% endfor %}
-        </div>
-        <!-- Pagination -->
-        <div class="flex justify-center items-center gap-4">
-            <button class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-dark-charcoal hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                Sebelumnya
-            </button>
-            <span class="text-sm text-medium-gray">Halaman 1 dari 5</span>
-            <button class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-dark-charcoal hover:bg-gray-50">
-                Selanjutnya
-            </button>
+        <div id="lomba-content">
+            {% include 'partials/content.html' %}
         </div>
     </main>
     <!-- Call to Action for Contributors -->

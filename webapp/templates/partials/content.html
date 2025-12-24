@@ -1,0 +1,87 @@
+{# lomba list #}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+    {% for lomba in list_lomba %}
+        <article class="bg-white rounded-lg shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full cursor-pointer group">
+            <div class="p-5 flex flex-col flex-1 gap-3">
+                <div>
+                    <h3 class="text-lg font-bold text-primary group-hover:text-[#12542b] leading-tight mb-1">
+                        {{ lomba.title }}
+                    </h3>
+                    <p class="text-sm text-medium-gray font-medium">{{ lomba.organizer or "-" }}</p>
+                </div>
+                <div class="mt-auto pt-4 flex flex-col gap-2 border-t border-gray-50">
+                    <div class="flex items-center gap-2 text-sm text-medium-gray">
+                        <span class="material-symbols-outlined text-[18px] text-primary">event</span>
+                        <span>Batas Pendaftaran: {{ lomba.registration_end | convert_to_id_date }} </span>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm text-medium-gray">
+                        <span class="material-symbols-outlined text-[18px] text-primary">location_on</span>
+                        <span>Lokasi: {{ lomba.location_details or "-" }} </span>
+                    </div>
+                </div>
+                <div class="flex justify-between items-start mt-3">
+                    <div class="flex flex-wrap gap-2 mb-1">
+                        {% for tag in lomba.tags %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                {{ tag.name }}
+                            </span>
+                        {% endfor %}
+                        {% if lomba.location %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                {{ lomba.location }}
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </article>
+    {% else %}
+        <p class="col-span-3 text-center text-medium-gray">Belum ada data lomba yang tersedia.</p>
+    {% endfor %}
+</div>
+
+{# pagination #}
+<!-- webapp/templates/partials/pagination.html -->
+
+{% if pagination and pagination.pages > 1 %}
+    <div class="flex justify-center items-center gap-4 mt-8">
+        
+        {# Tombol Sebelumnya #}
+        {% if pagination.has_prev %}
+            <a href="{{ url_for('home.index', page=pagination.prev_num, q=query) }}"
+               hx-get="{{ url_for('home.index', page=pagination.prev_num, q=query) }}"
+               hx-target="#lomba-content"
+               hx-swap="innerHTML"
+               hx-push-url="true"
+               class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-dark-charcoal hover:bg-gray-50">
+                Sebelumnya
+            </a>
+        {% else %}
+            <button class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-dark-charcoal disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                Sebelumnya
+            </button>
+        {% endif %}
+
+        {# Info Halaman #}
+        <span class="text-sm text-medium-gray">
+            Halaman {{ pagination.page }} dari {{ pagination.pages }}
+        </span>
+
+        {# Tombol Selanjutnya #}
+        {% if pagination.has_next %}
+            <a href="{{ url_for('home.index', page=pagination.next_num, q=query) }}"
+               hx-get="{{ url_for('home.index', page=pagination.next_num, q=query) }}"
+               hx-target="#lomba-content"
+               hx-swap="innerHTML"
+               hx-push-url="true"
+               class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-dark-charcoal hover:bg-gray-50">
+                Selanjutnya
+            </a>
+        {% else %}
+            <button class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-dark-charcoal disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                Selanjutnya
+            </button>
+        {% endif %}
+
+    </div>
+{% endif %}
