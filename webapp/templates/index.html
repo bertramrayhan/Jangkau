@@ -4,81 +4,213 @@
 
 {% block content %}
 
-    <section class="w-full bg-background-light py-16 md:py-24 px-4">
-        <div class="max-w-4xl mx-auto text-center flex flex-col items-center gap-6">
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-primary leading-tight tracking-tight">
-                Temukan Peluang <br class="hidden md:block"/> Prestasimu Berikutnya
-            </h1>
-            <p class="text-medium-gray text-base md:text-lg max-w-2xl font-normal leading-relaxed">
-                Satu tempat untuk semua informasi lomba, beasiswa, dan kompetisi di seluruh Indonesia.
-            </p>
-            <!-- Search Bar -->
-            <div class="w-full max-w-xl mt-4 relative group">
+<section class="w-full bg-background-light py-16 md:py-24 px-4">
+    <div class="max-w-4xl mx-auto text-center flex flex-col items-center gap-6">
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-primary leading-tight tracking-tight">
+            Temukan Peluang <br class="hidden md:block"/> Prestasimu Berikutnya
+        </h1>
+        <p class="text-medium-gray text-base md:text-lg max-w-2xl font-normal leading-relaxed">
+            Satu tempat untuk semua informasi lomba, beasiswa, dan kompetisi di seluruh Indonesia.
+        </p>
+        <!-- Search Bar -->
+        <div class="w-full max-w-xl mt-4 relative group">
 
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <span class="material-symbols-outlined text-primary">search</span>
-                </div>
-                <input name="q"
-                       id="search-input" 
-                       class="block w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-lg text-dark-charcoal placeholder-gray-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm text-base" 
-                       placeholder="Cari nama lomba..." 
-                       type="search"
-                       value="{{ query or '' }}"
-                       hx-get="{{ url_for('home.index') }}"
-                       hx-target="#lomba-content"
-                       hx-swap="innerHTML"
-                       hx-trigger="keyup changed delay:500ms, search"
-                       hx-indicator="#search-indicator"
-                       hx-push-url="true"/>
-                
-                <!-- Loading indicator -->
-                <div id="search-indicator" class="htmx-indicator absolute right-8 top-1/2 transform -translate-y-1/2">
-                    <div class="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full"></div>
-                </div>
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <span class="material-symbols-outlined text-primary">search</span>
+            </div>
+            <input name="q"
+                    id="search-input" 
+                    class="block w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-lg text-dark-charcoal placeholder-gray-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm text-base" 
+                    placeholder="Cari nama lomba..." 
+                    type="search"
+                    value="{{ query or '' }}"
+                    hx-get="{{ url_for('home.index') }}"
+                    hx-include="[name='q'], [name='tags'],[name='tipe_lomba'],[name='lokasi']"
+                    hx-target="#lomba-content"
+                    hx-swap="innerHTML"
+                    hx-trigger="keyup changed delay:500ms, search"
+                    hx-indicator="#search-indicator"
+                    hx-push-url="true"/>
+            
+            <!-- Loading indicator -->
+            <div id="search-indicator" class="htmx-indicator absolute right-8 top-1/2 transform -translate-y-1/2">
+                <div class="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full"></div>
             </div>
         </div>
-    </section>
-    <!-- Main Content Area -->
-    <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        <!-- Action Bar: Header & Filter -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-gray-100 pb-4">
-            <h2 class="text-2xl font-bold text-dark-charcoal">Lomba Terbaru</h2>
-            <button class="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-lg shadow-sm hover:bg-gray-50 text-dark-charcoal font-medium transition-all group">
-                <div class="bg-gray-100 p-1 rounded-full group-hover:bg-gray-200 transition-colors">
-                    <span class="material-symbols-outlined text-[18px]">filter_list</span>
+    </div>
+</section>
+<!-- Main Content Area -->
+<main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+    <!-- Action Bar: Header & Filter -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-gray-100 pb-4">
+        <h2 class="text-2xl font-bold text-dark-charcoal">Lomba Terbaru</h2>
+        <label for="filter-sidebar-toggle" class="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-lg shadow-sm hover:bg-gray-50 text-dark-charcoal font-medium transition-all group cursor-pointer">
+            <span class="material-symbols-outlined text-[18px]">filter_list</span>
+            <span>Filter</span>
+        </label>
+    </div>
+    <div id="lomba-content">
+        {% include 'partials/content.html' %}
+    </div>
+</main>
+<!-- Call to Action for Contributors -->
+<section class="w-full bg-primary text-white py-16 md:py-20 relative overflow-hidden">
+    <!-- Abstract Pattern Background -->
+    <div class="absolute inset-0 opacity-10" data-alt="Abstract subtle dot pattern overlay on green background" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 24px 24px;"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center gap-10 md:gap-16">
+        <!-- Icon/Illustration Side -->
+        <div class="flex bg-white/10 p-8 rounded-full">
+            <span class="material-symbols-outlined text-[64px] md:text-[80px] text-white">handshake</span>
+        </div>
+        <!-- Content Side -->
+        <div class="flex flex-col text-center md:text-left gap-4 max-w-2xl">
+            <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight">
+                Ayo Bangun Jangkau Bersama
+            </h2>
+            <p class="text-white/90 text-lg leading-relaxed">
+                Jangkau lahir dari masalah nyata yang kita hadapi sebagai mahasiswa. Jika kamu seorang programmer, desainer, atau punya ide, kontribusimu sangat berarti.
+            </p>
+            <div class="mt-4">
+                <a href="https://github.com/bertramrayhan/Jangkau" 
+                class="bg-accent hover:bg-yellow-500 text-dark-charcoal font-bold px-8 py-3.5 rounded-lg transition-colors inline-flex items-center gap-2 shadow-lg cursor-pointer">
+                    <span class="material-symbols-outlined">code</span>
+                    Lihat Kode &amp; Mulai Berkontribusi!
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# PANEL FILTER #}
+
+<input type="checkbox" id="filter-sidebar-toggle" class="hidden peer">
+
+<label for="filter-sidebar-toggle" 
+       class="fixed inset-0 bg-black/40 z-40 hidden peer-checked:block cursor-pointer">
+</label>
+
+<aside class="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-50 
+            transform translate-x-full transition-transform duration-300 ease-in-out
+            peer-checked:translate-x-0
+            flex flex-col">
+    
+    <!-- 1. Header Panel -->
+    <div class="flex justify-between items-center p-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-dark-charcoal">Filter Lomba</h3>
+        <!-- Tombol 'X' untuk menutup panel -->
+        <label for="filter-sidebar-toggle" class="flex cursor-pointer p-1 rounded-full hover:bg-gray-100">
+            <span class="material-symbols-outlined text-medium-gray">close</span>
+        </label>
+    </div>
+
+    <form id="filter-form"
+        class="flex-1 flex flex-col min-h-0"
+        >
+    <!-- 2. Konten Filter (Scrollable) -->
+        <div class="flex-grow p-4 overflow-y-auto space-y-6">
+            
+            <!-- Filter Kategori (Contoh Hardcoded) -->
+            <div class="space-y-3">
+                <h4 class="font-semibold text-sm text-dark-charcoal">Kategori</h4>
+
+                <div class="grid grid-cols-2 gap-2">
+                    {% for tag in list_tags %}
+                        {% if tag.name in selected_tags %} 
+                            <label class="flex items-center gap-2 p-2 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input name="tags" value="{{ tag.name }}" type="checkbox" class="rounded text-primary focus:ring-primary/50" checked>
+                                <span class="text-sm">{{ tag.name }}</span>
+                            </label>
+                        {% else %}
+                        <label class="flex items-center gap-2 p-2 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input name="tags" value="{{ tag.name }}" type="checkbox" class="rounded text-primary focus:ring-primary/50">
+                                <span class="text-sm">{{ tag.name }}</span>
+                            </label>
+                        {% endif %}
+                    {% endfor %}
                 </div>
-                <span>Filter</span>
+            </div>
+
+            <div class="space-y-3">
+                <h4 class="font-semibold text-sm text-dark-charcoal">Tipe</h4>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="tipe_lomba" value="all" class="text-primary focus:ring-primary/50" {% if tipe_lomba == "all" %} checked {%endif%}>
+                        <span class="text-sm">Semua</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="tipe_lomba" value="true" class="text-primary focus:ring-primary/50" {% if tipe_lomba == "true" %} checked {%endif%}>
+                        <span class="text-sm">Gratis</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="tipe_lomba" value="false" class="text-primary focus:ring-primary/50" {% if tipe_lomba == "false" %} checked {%endif%}>
+                        <span class="text-sm">Berbayar</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <h4 class="font-semibold text-sm text-dark-charcoal">Lokasi</h4>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="lokasi" value="Online" class="rounded text-primary focus:ring-primary/50">
+                        <span class="text-sm">Online</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="lokasi" value="Offline" class="rounded text-primary focus:ring-primary/50">
+                        <span class="text-sm">Offline</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="lokasi" value="Hybrid" class="rounded text-primary focus:ring-primary/50">
+                        <span class="text-sm">Hybrid</span>
+                    </label>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 3. Footer Panel -->
+        <div class="p-4 border-t border-gray-200 flex gap-3">
+            <button  type="button"
+                    class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-semibold text-dark-charcoal hover:bg-gray-50 cursor-pointer"
+                    hx-get="{{ url_for('home.index') }}"
+                    hx-include="[name='q']"
+                    hx-target="#lomba-content"
+                    hx-swap="innerHTML"
+                    hx-push-url="true"
+                    onclick="resetFilters(); document.getElementById('filter-sidebar-toggle').checked = false;">
+                Reset
+            </button>
+            <button hx-get="{{ url_for('home.index') }}"
+                    hx-target="#lomba-content"
+                    hx-swap="innerHTML"
+                    hx-push-url="true"
+                    hx-include="[name='q'],[name='tags'],[name='tipe_lomba'],[name='lokasi']"
+                    class="flex-1 px-4 py-2 bg-primary border border-primary rounded-lg text-sm font-semibold text-white hover:bg-[#12542b] cursor-pointer"
+                    onclick="document.getElementById('filter-sidebar-toggle').checked = false;">
+                Terapkan Filter
             </button>
         </div>
-        <div id="lomba-content">
-            {% include 'partials/content.html' %}
-        </div>
-    </main>
-    <!-- Call to Action for Contributors -->
-    <section class="w-full bg-primary text-white py-16 md:py-20 relative overflow-hidden">
-        <!-- Abstract Pattern Background -->
-        <div class="absolute inset-0 opacity-10" data-alt="Abstract subtle dot pattern overlay on green background" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 24px 24px;"></div>
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center gap-10 md:gap-16">
-            <!-- Icon/Illustration Side -->
-            <div class="flex-shrink-0 bg-white/10 p-8 rounded-full">
-                <span class="material-symbols-outlined text-[64px] md:text-[80px] text-white">handshake</span>
-            </div>
-            <!-- Content Side -->
-            <div class="flex flex-col text-center md:text-left gap-4 max-w-2xl">
-                <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight">
-                    Ayo Bangun Jangkau Bersama
-                </h2>
-                <p class="text-white/90 text-lg leading-relaxed">
-                    Jangkau lahir dari masalah nyata yang kita hadapi sebagai mahasiswa. Jika kamu seorang programmer, desainer, atau punya ide, kontribusimu sangat berarti.
-                </p>
-                <div class="mt-4">
-                    <button class="bg-accent hover:bg-yellow-500 text-dark-charcoal font-bold px-8 py-3.5 rounded-lg transition-colors inline-flex items-center gap-2 shadow-lg">
-                        <span class="material-symbols-outlined">code</span>
-                        Lihat Kode &amp; Mulai Berkontribusi
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
+    </form>
+</aside>
 
+<script>
+    function resetFilters( ) {
+        // 1. Temukan form filter berdasarkan ID-nya
+        const filterForm = document.getElementById('filter-form');
+        if (!filterForm) return; // Pengaman jika form tidak ditemukan
+
+        // 2. Temukan SEMUA input checkbox di dalam form tersebut
+        const checkboxes = filterForm.querySelectorAll('input[type="checkbox"]');
+        const radioBtns = filterForm.querySelectorAll('input[type="radio"]');
+
+        // 3. Loop melalui setiap checkbox dan hapus centangnya
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        radioBtns.forEach(radioBtn => {
+            radioBtn.checked = false;
+        });
+    }
+</script>
 {% endblock %}
