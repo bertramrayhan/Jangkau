@@ -1,0 +1,446 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Detail Lomba - Jangkau{% endblock %}
+
+{% block content %}
+<section class="bg-surface-light border-b border-gray-200 dark:bg-surface-dark dark:border-white/10">
+    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+            <div class="flex-1 space-y-4">
+                <div>
+                    <!-- Back button -->
+                    <a href="{{ back_url }}" 
+                       class="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors mb-3 group">
+                        <span class="material-symbols-outlined text-[18px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+                        <span class="font-medium">Kembali</span>
+                    </a>
+                    
+                    <h1 class="text-3xl font-extrabold tracking-tight text-primary dark:text-green-400 sm:text-4xl lg:text-5xl mb-2">
+                        {{ lomba.title }}
+                    </h1>
+                    <div class="flex items-center gap-2 text-text-secondary dark:text-gray-400">
+                        <span class="text-lg font-medium"> {{lomba.organizer or '-'}} </span>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2 pt-2">
+                    <!-- Tags dari database -->
+                    {% for tag in lomba.tags %}
+                        <span class="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary ring-1 ring-inset ring-primary/20">
+                            {{ tag.name }}
+                        </span>
+                    {% endfor %}
+                    
+                    <!-- Location badge -->
+                    {% if lomba.location %}
+                        <span class="inline-flex items-center rounded-full bg-accent/10 px-3 py-1 text-sm font-medium text-amber-800 ring-1 ring-inset ring-accent/20">
+                            {{ lomba.location }}
+                        </span>
+                    {% endif %}
+                    
+                    <!-- Free/Paid badge -->
+                    {% if lomba.is_free %}
+                        <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800 ring-1 ring-inset ring-green-500/10">
+                            Gratis
+                        </span>
+                    {% else %}
+                        <span class="inline-flex items-center rounded-full bg-dark-charcoal/10 px-3 py-1 text-sm font-medium text-dark-charcoal ring-1 ring-inset ring-gray-500/10">
+                            Berbayar
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 pt-2 lg:pt-0 lg:self-center shrink-0">
+                <a href="{{ lomba.source_url }}" target="_blank"
+                class="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-accent px-6 text-base font-bold text-white shadow-sm transition-colors hover:bg-amber-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 cursor-pointer">
+                    <span>Kunjungi Situs Resmi</span>
+                    <span class="material-symbols-outlined text-[20px]">open_in_new</span>
+                </a>
+                <button onclick="copyToClipboard()" id="copy-btn"
+                        class="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-6 text-base font-semibold text-text-main shadow-sm transition-colors hover:bg-gray-50 dark:bg-surface-dark dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800 cursor-pointer">
+                    <span class="material-symbols-outlined text-[20px]" id="copy-icon">link</span>
+                    <span id="copy-text">Salin Link</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Main Content Layout -->
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-12">
+        <!-- Left Column: Description (8 cols) -->
+        <div class="lg:col-span-8 space-y-8">
+            <section>
+                <h2 class="text-2xl font-bold text-text-main dark:text-white mb-4">Deskripsi</h2>
+                <div class="prose prose-lg prose-green max-w-none text-text-secondary dark:text-gray-300 space-y-4 leading-relaxed">
+                    {{ lomba.raw_description | replace('\n', '<br>') | safe }}                
+                </div>
+            </section>
+
+            <!-- Similar Competitions Section -->
+            {% if similar_lomba %}
+            <section>
+                <h2 class="text-2xl font-bold text-text-main dark:text-white mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">explore</span>
+                    Lomba Serupa
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for lomba in similar_lomba %}
+                    <!-- Similar Competition Card -->
+                    <a href="{{ url_for('detail.index', id=lomba.id, from=back_url) }}" 
+                       class="group flex flex-col p-5 bg-white dark:bg-surface-dark rounded-xl border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 h-full">
+                        
+                        <!-- Title & Organizer -->
+                        <h3 class="font-bold text-text-main dark:text-white group-hover:text-primary transition-colors line-clamp-2 mb-2 text-lg">
+                            {{ lomba.title }}
+                        </h3>
+                        <p class="text-sm text-text-secondary dark:text-gray-400 mb-4 line-clamp-1">
+                            {{ lomba.organizer or '-' }}
+                        </p>
+                        
+                        <!-- Tags (max 2) -->
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            {% for tag in lomba.tags[:2] %}
+                            <span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
+                                {{ tag.name }}
+                            </span>
+                            {% endfor %}
+                            {% if lomba.tags|length > 2 %}
+                            <span class="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-800 px-2.5 py-1 text-xs font-medium text-gray-600 dark:text-gray-400">
+                                +{{ lomba.tags|length - 2 }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Quick Info -->
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="flex items-center gap-1.5 text-text-secondary dark:text-gray-400">
+                                    <span class="material-symbols-outlined text-[16px]">schedule</span>
+                                    <span class="text-xs">{{ lomba.registration_end | convert_to_id_date if lomba.registration_end else 'TBA' }}</span>
+                                </span>
+                                {% if lomba.is_free %}
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">Gratis</span>
+                                {% elif lomba.is_free == false %}
+                                <span class="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs font-medium">Berbayar</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if lomba.location %}
+                            <div class="flex items-center gap-1.5 text-xs text-text-secondary dark:text-gray-400">
+                                <span class="material-symbols-outlined text-[16px]">location_on</span>
+                                <span>{{ lomba.location }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Hover Arrow - Always at bottom -->
+                        <div class="flex items-center justify-between mt-auto pt-3 border-t border-gray-100 dark:border-gray-700">
+                            <span class="text-xs text-primary font-medium">Lihat Detail</span>
+                            <span class="material-symbols-outlined text-primary text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                
+                <!-- View More Button -->
+                <div class="mt-6 text-center">
+                    <a href="{{ back_url }}" 
+                       class="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors font-medium">
+                        <span>Jelajahi Semua Lomba</span>
+                        <span class="material-symbols-outlined text-[18px]">explore</span>
+                    </a>
+                </div>
+            </section>
+            {% endif %}
+        </div>
+        <!-- Right Column: Quick Info Box (4 cols) -->
+        <div class="lg:col-span-4">
+            <div class="sticky top-24 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md p-6 shadow-xl dark:bg-primary/5 dark:border-white/10 dark:backdrop-blur-md">
+                <h3 class="text-lg font-bold text-text-main dark:text-white mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">info</span>
+                    Informasi Penting
+                </h3>
+                
+                <div class="space-y-6">
+                    <!-- Registration Deadline -->
+                    <div class="flex gap-4">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-green-900/30 dark:text-green-400">
+                            <span class="material-symbols-outlined">event_upcoming</span>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-text-secondary dark:text-gray-400">Batas Pendaftaran</p>
+                            <p class="font-semibold text-text-main dark:text-white mb-2">{{ lomba.registration_end | convert_to_id_date if lomba.registration_end else '-' }}</p>
+                            
+                            <!-- Progress Indicator -->
+                            {% if lomba.registration_end %}
+                            <div id="deadline-progress" class="mt-2" data-deadline="{{ lomba.registration_end }}">
+                                <!-- Progress bar will be dynamically generated -->
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <hr class="border-gray-100 dark:border-gray-800"/>
+                    
+                    <!-- Event Date -->
+                    <div class="flex gap-4">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-green-900/30 dark:text-green-400">
+                            <span class="material-symbols-outlined">calendar_month</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-text-secondary dark:text-gray-400">Pelaksanaan</p>
+                            <p class="font-semibold text-text-main dark:text-white">
+                                {{ lomba.event_start | convert_to_id_date if lomba.event_start else '-'}}
+                            </p>
+                        </div>
+                    </div>
+                    <hr class="border-gray-100 dark:border-gray-800"/>
+                    
+                    <!-- Cost -->
+                    <div class="flex gap-4">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-green-900/30 dark:text-green-400">
+                            <span class="material-symbols-outlined">payments</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-text-secondary dark:text-gray-400">Biaya Pendaftaran</p>
+                            <p class="font-semibold text-text-main dark:text-white">
+                                {% if lomba.is_free %}
+                                    Gratis
+                                {% elif lomba.is_free == false %}
+                                    {{ lomba.price_details or "Berbayar" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <hr class="border-gray-100 dark:border-gray-800"/>
+                    
+                    <!-- Location -->
+                    <div class="flex gap-4">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-green-900/30 dark:text-green-400">
+                            <span class="material-symbols-outlined">location_on</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-text-secondary dark:text-gray-400">Lokasi</p>
+                            <div class="flex items-center gap-1">
+                                {% if lomba.location == 'Online' %}
+                                    <span class="inline-block size-2 rounded-full bg-green-500"></span>
+                                {% elif lomba.location == 'Offline' %}
+                                    <span class="inline-block size-2 rounded-full bg-blue-500"></span>
+                                {% elif lomba.location == 'Hybrid' %}
+                                    <span class="inline-block size-2 rounded-full bg-amber-500"></span>
+                                {% endif %}
+                                <p class="font-semibold text-text-main dark:text-white">{{ lomba.location or '-' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="border-gray-100 dark:border-gray-800"/>
+                    
+                    <!-- Location Details -->
+                    <div class="flex gap-4">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-green-900/30 dark:text-green-400">
+                            <span class="material-symbols-outlined">map</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-text-secondary dark:text-gray-400">Detail Lokasi</p>
+                            <p class="font-semibold text-text-main dark:text-white">{{ lomba.location_details or '-' }}</p>
+                        </div>
+                    </div>
+                    <hr class="border-gray-100 dark:border-gray-800"/>
+                    
+                    <!-- Organizer -->
+                    <div class="flex gap-4">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-green-900/30 dark:text-green-400">
+                            <span class="material-symbols-outlined">business</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-text-secondary dark:text-gray-400">Penyelenggara</p>
+                            <p class="font-semibold text-text-main dark:text-white">{{ lomba.organizer or '-' }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 rounded-xl bg-gray-50 p-4 dark:bg-gray-800/50">
+                    <p class="text-xs text-text-secondary text-center leading-relaxed dark:text-gray-400">
+                        Informasi ini dapat berubah sewaktu-waktu sesuai kebijakan penyelenggara. Pastikan Anda mengunjungi situs resmi untuk info terbaru.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scroll to Top Button -->
+<button id="scrollToTop" 
+        class="fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full bg-primary text-white shadow-lg transition-all duration-300 hover:bg-primary/90 hover:scale-110 opacity-0 pointer-events-none cursor-pointer"
+        onclick="scrollToTop()">
+    <span class="material-symbols-outlined text-[20px]">keyboard_arrow_up</span>
+</button>
+
+<script>
+// Scroll to Top functionality
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+// Show/hide scroll button based on scroll position
+window.addEventListener('scroll', function() {
+    const scrollToTopBtn = document.getElementById('scrollToTop');
+    if (window.scrollY > 300) {
+        scrollToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
+        scrollToTopBtn.classList.add('opacity-100', 'pointer-events-auto');
+    } else {
+        scrollToTopBtn.classList.add('opacity-0', 'pointer-events-none');
+        scrollToTopBtn.classList.remove('opacity-100', 'pointer-events-auto');
+    }
+});
+
+// Deadline Progress Indicator
+function initDeadlineProgress() {
+    const progressContainer = document.getElementById('deadline-progress');
+    if (!progressContainer) return;
+    
+    const deadlineStr = progressContainer.getAttribute('data-deadline');
+    if (!deadlineStr) return;
+    
+    // Parse deadline (assuming format YYYY-MM-DD)
+    const deadline = new Date(deadlineStr);
+    const today = new Date();
+    const timeDiff = deadline.getTime() - today.getTime();
+    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    
+    // Helper function to format days into months and days
+    function formatTimeRemaining(days) {
+        if (days < 0) return 'Pendaftaran ditutup';
+        if (days === 0) return 'Berakhir hari ini!';
+        if (days === 1) return '1 hari lagi';
+        
+        // For more than 30 days, convert to months and days
+        if (days > 30) {
+            const months = Math.floor(days / 30);
+            const remainingDays = days % 30;
+            
+            if (remainingDays === 0) {
+                return months === 1 ? '1 bulan lagi' : `${months} bulan lagi`;
+            } else {
+                const monthText = months === 1 ? '1 bulan' : `${months} bulan`;
+                const dayText = remainingDays === 1 ? '1 hari' : `${remainingDays} hari`;
+                return `${monthText} ${dayText} lagi`;
+            }
+        }
+        
+        return `${days} hari lagi`;
+    }
+    
+    let progressHTML = '';
+    let urgencyClass = '';
+    let progressPercent = 0;
+    let statusText = formatTimeRemaining(daysDiff);
+    let iconEmoji = '';
+    
+    if (daysDiff < 0) {
+        // Expired
+        urgencyClass = 'bg-gray-100 text-gray-600 border-gray-200';
+        iconEmoji = '⚫';
+        progressPercent = 0;
+    } else if (daysDiff <= 1) {
+        // Urgent (today or tomorrow)
+        urgencyClass = 'bg-red-50 text-red-700 border-red-200';
+        iconEmoji = '🔴';
+        progressPercent = daysDiff === 0 ? 5 : 15;
+    } else if (daysDiff <= 3) {
+        // Very urgent (2-3 days)
+        urgencyClass = 'bg-red-50 text-red-700 border-red-200';
+        iconEmoji = '🔴';
+        progressPercent = (daysDiff / 7) * 100;
+    } else if (daysDiff <= 7) {
+        // Soon (4-7 days)
+        urgencyClass = 'bg-amber-50 text-amber-700 border-amber-200';
+        iconEmoji = '🟡';
+        progressPercent = (daysDiff / 14) * 100;
+    } else if (daysDiff <= 30) {
+        // Safe (8-30 days)
+        urgencyClass = 'bg-green-50 text-green-700 border-green-200';
+        iconEmoji = '🟢';
+        progressPercent = Math.min(100, (daysDiff / 30) * 100);
+    } else {
+        // Very safe (more than 1 month)
+        urgencyClass = 'bg-blue-50 text-blue-700 border-blue-200';
+        iconEmoji = '🔵';
+        progressPercent = 100;
+    }
+    
+    progressHTML = `
+        <div class="rounded-lg border p-3 ${urgencyClass}">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-medium">${iconEmoji} ${statusText}</span>
+            </div>
+            <div class="w-full bg-white/50 rounded-full h-2">
+                <div class="h-2 rounded-full transition-all duration-1000 ease-out" 
+                     style="width: ${progressPercent}%; background-color: currentColor; opacity: 0.7;"
+                     id="progress-bar"></div>
+            </div>
+        </div>
+    `;
+    
+    progressContainer.innerHTML = progressHTML;
+    
+    // Animate progress bar
+    setTimeout(() => {
+        const progressBar = document.getElementById('progress-bar');
+        if (progressBar) {
+            progressBar.style.width = progressPercent + '%';
+        }
+    }, 100);
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', initDeadlineProgress);
+
+async function copyToClipboard() {
+    const copyBtn = document.getElementById('copy-btn');
+    const copyIcon = document.getElementById('copy-icon');
+    const copyText = document.getElementById('copy-text');
+    
+    try {
+        // Copy current page URL to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        
+        // Update button state to show success
+        copyIcon.textContent = 'check';
+        copyText.textContent = 'Tersalin!';
+        copyBtn.classList.add('bg-green-50', 'border-green-200', 'text-green-800');
+        copyBtn.classList.remove('border-gray-300', 'text-text-main', 'hover:bg-gray-50');
+        
+        // Reset button after 2 seconds
+        setTimeout(() => {
+            copyIcon.textContent = 'link';
+            copyText.textContent = 'Salin Link';
+            copyBtn.classList.remove('bg-green-50', 'border-green-200', 'text-green-800');
+            copyBtn.classList.add('border-gray-300', 'text-text-main', 'hover:bg-gray-50');
+        }, 2000);
+        
+    } catch (err) {
+        // Fallback for older browsers
+        console.error('Failed to copy: ', err);
+        
+        // Show error state
+        copyIcon.textContent = 'error';
+        copyText.textContent = 'Gagal!';
+        copyBtn.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
+        
+        // Reset after 2 seconds
+        setTimeout(() => {
+            copyIcon.textContent = 'link';
+            copyText.textContent = 'Salin Link';
+            copyBtn.classList.remove('bg-red-50', 'border-red-200', 'text-red-800');
+            copyBtn.classList.add('border-gray-300', 'text-text-main');
+        }, 2000);
+    }
+}
+</script>
+
+{% endblock %}

@@ -1,40 +1,65 @@
 {# lomba list #}
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
     {% for lomba in list_lomba %}
-        <article class="bg-white rounded-lg shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full cursor-pointer group">
-            <div class="p-5 flex flex-col flex-1 gap-3">
-                <div>
-                    <h3 class="text-lg font-bold text-primary group-hover:text-[#12542b] leading-tight mb-1">
+        <a href="{{ url_for('detail.index', id=lomba.id) }}" 
+           class="bg-white rounded-lg shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full cursor-pointer group hover:border-primary/20 hover:-translate-y-1 hover:scale-[1.02] transform block">
+            <article class="p-5 flex flex-col flex-1 gap-3 h-full">
+                <!-- Top gradient accent -->
+                <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-accent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                <div class="relative">
+                    <h3 class="text-lg font-bold text-primary group-hover:text-[#0f4124] leading-tight mb-1 transition-colors duration-300 group-hover:underline decoration-2 underline-offset-4">
                         {{ lomba.title }}
                     </h3>
-                    <p class="text-sm text-medium-gray font-medium">{{ lomba.organizer or "-" }}</p>
+                    <p class="text-sm text-medium-gray font-medium group-hover:text-dark-charcoal transition-colors duration-300">
+                        {{ lomba.organizer or "-" }}
+                    </p>
+                    
+                    <!-- Floating icon on hover -->
+                    <div class="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transform group-hover:rotate-12 transition-all duration-300">
+                        <span class="material-symbols-outlined text-primary text-xl animate-bounce">open_in_new</span>
+                    </div>
                 </div>
-                <div class="mt-auto pt-4 flex flex-col gap-2 border-t border-gray-50">
-                    <div class="flex items-center gap-2 text-sm text-medium-gray">
-                        <span class="material-symbols-outlined text-[18px] text-primary">event</span>
+                
+                <div class="mt-auto pt-4 flex flex-col gap-2 border-t border-gray-50 group-hover:border-primary/20 transition-colors duration-300">
+                    <div class="flex items-center gap-2 text-sm text-medium-gray group-hover:text-dark-charcoal transition-colors duration-300">
+                        <span class="material-symbols-outlined text-[18px] text-primary group-hover:scale-110 transition-transform duration-300">event</span>
                         <span>Batas Pendaftaran: {{ lomba.registration_end | convert_to_id_date }} </span>
                     </div>
-                    <div class="flex items-center gap-2 text-sm text-medium-gray">
-                        <span class="material-symbols-outlined text-[18px] text-primary">location_on</span>
+                    <div class="flex items-center gap-2 text-sm text-medium-gray group-hover:text-dark-charcoal transition-colors duration-300">
+                        <span class="material-symbols-outlined text-[18px] text-primary group-hover:scale-110 transition-transform duration-300">location_on</span>
                         <span>Lokasi: {{ lomba.location_details or "-" }} </span>
                     </div>
                 </div>
+                
                 <div class="flex justify-between items-start mt-3">
                     <div class="flex flex-wrap gap-2 mb-1">
                         {% for tag in lomba.tags %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary group-hover:bg-primary/20 group-hover:scale-105 transition-all duration-300">
                                 {{ tag.name }}
                             </span>
                         {% endfor %}
                         {% if lomba.location %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent/10 text-amber-800 group-hover:bg-accent/20 group-hover:scale-105 transition-all duration-300">
                                 {{ lomba.location }}
+                            </span>
+                        {% endif %}
+                        
+                        <!-- Free/Paid badge with animation -->
+                        {% if lomba.is_free %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 group-hover:bg-green-200 group-hover:scale-105 transition-all duration-300 relative overflow-hidden">
+                                <span class="relative z-10">Gratis</span>
+                                <div class="absolute inset-0 bg-gradient-to-r from-green-200 to-green-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-dark-charcoal/10 text-dark-charcoal group-hover:bg-dark-charcoal/20 group-hover:scale-105 transition-all duration-300">
+                                Berbayar
                             </span>
                         {% endif %}
                     </div>
                 </div>
-            </div>
-        </article>
+            </article>
+        </a>
     {% else %}
         <p class="col-span-3 text-center text-medium-gray">Belum ada data lomba yang tersedia.</p>
     {% endfor %}

@@ -1,6 +1,6 @@
 from flask import Flask
 from helpers import convert_to_id_date
-from routes import home_bp
+from routes import home_bp, detail_bp
 from models import db
 import os
 
@@ -20,6 +20,7 @@ app.jinja_env.filters["convert_to_id_date"] = convert_to_id_date
 
 def register_routes(app):
     app.register_blueprint(home_bp)
+    app.register_blueprint(detail_bp)
 
 if __name__ == '__main__':
     register_routes(app)
