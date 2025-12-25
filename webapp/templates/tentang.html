@@ -1,0 +1,290 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Tentang Jangkau - Jangkau{% endblock %}
+
+{% block content %}
+    <section class="flex flex-col items-center justify-center px-6 py-28 text-center lg:px-24 lg:py-48 bg-white dark:bg-transparent relative overflow-hidden">
+        <!-- Background floating shapes -->
+        <div class="bg-float-shape bg-float-1"></div>
+        <div class="bg-float-shape bg-float-2"></div>
+        
+        <div class="max-w-5xl relative z-10">
+            <div class="flex flex-col items-center gap-6">
+                <span class="inline-flex items-center gap-2 rounded-full bg-green-50 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-primary ring-1 ring-primary/10 dark:bg-primary/20 dark:text-primary float-fast">
+                    Tentang Kami
+                </span>
+                <h1 class="text-5xl font-black leading-[1.1] tracking-tighter text-primary sm:text-6xl lg:text-7xl dark:text-primary">
+                    Membuka Setiap <br class="hidden sm:block"/> Potensi.
+                </h1>
+                <p class="mt-6 max-w-2xl text-lg font-medium leading-relaxed text-medium-gray dark:text-gray-300 sm:text-xl lg:text-2xl lg:leading-relaxed">
+                    Jangkau dimulai dari sebuah ide sederhana: bagaimana jika ada satu tempat terpusat untuk semua informasi berharga bagi mahasiswa? Dari lomba hingga beasiswa, platform ini adalah jawaban atas masalah informasi yang tersebar, sebuah alat bantu untuk membantumu menjangkau potensimu.
+                </p>
+            </div>
+        </div>
+    </section>
+    <section class="bg-background-light px-6 py-24 dark:bg-gray-900 lg:px-24 lg:py-32">
+        <div class="mx-auto max-w-7xl">
+            <div class="flex flex-col gap-16 lg:flex-row lg:items-center lg:gap-32">
+                <div class="flex-1 space-y-6">
+                    <h2 class="text-4xl font-extrabold leading-tight tracking-tight text-primary dark:text-white lg:text-5xl">
+                        Semangat yang Hilang <span class="text-medium-gray/40">Karena Informasi.</span>
+                    </h2>
+                    <div class="h-1 w-20 rounded-full bg-accent"></div>
+                    <p class="text-lg leading-loose text-medium-gray dark:text-gray-400 lg:text-xl lg:leading-loose">
+                        Mencari peluang seharusnya menjadi hal yang menyenangkan, tetapi seringkali justru sebaliknya. Kita harus menjelajahi puluhan akun Instagram, memeriksa mading kampus yang jarang diperbarui, hanya untuk menemukan bahwa pendaftaran lomba impian sudah ditutup. Proses 'berburu' informasi ini begitu melelahkan hingga rasa semangat untuk berkompetisi seringkali hilang bahkan sebelum kita sempat memulai.
+                    </p>
+                </div>
+                <div class="flex flex-1 justify-center lg:justify-end">
+                    <div class="relative h-72 w-full max-w-lg rounded-3xl bg-white p-10 shadow-xl ring-1 ring-gray-100 dark:bg-gray-800 dark:ring-gray-700">
+                        <div class="absolute right-10 top-10 h-44 w-36 rotate-6 rounded-2xl bg-gray-50 p-6 shadow-md ring-1 ring-gray-200 dark:bg-gray-700 dark:ring-gray-600">
+                            <div class="h-2.5 w-16 rounded bg-gray-200 dark:bg-gray-500"></div>
+                            <div class="mt-3 h-2.5 w-24 rounded bg-gray-200 dark:bg-gray-500"></div>
+                            <div class="mt-10 flex justify-center text-primary/30">
+                                <span class="material-symbols-outlined text-5xl">warning</span>
+                            </div>
+                        </div>
+                        <div class="absolute left-14 top-14 h-44 w-36 -rotate-12 rounded-2xl bg-gray-200/60 dark:bg-gray-600/50"></div>
+                        <div class="absolute bottom-8 left-1/2 h-44 w-36 -translate-x-1/2 rotate-0 rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-gray-100 dark:bg-gray-700 dark:ring-gray-600 transition-transform hover:-translate-y-2">
+                            <div class="flex h-full flex-col items-center justify-center gap-3">
+                                <span class="material-symbols-outlined text-5xl text-gray-300">search_off</span>
+                                <span class="text-xs font-bold uppercase tracking-wide text-gray-400">Not Found</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="bg-white px-6 py-32 dark:bg-background-dark lg:px-24">
+        <div class="mx-auto max-w-7xl">
+            <div class="mb-20 max-w-3xl">
+                <h2 class="text-4xl font-extrabold tracking-tight text-primary dark:text-white lg:text-5xl">Mesin Pencari untuk <br/> Peluangmu</h2>
+            </div>
+            <div class="grid gap-10 md:grid-cols-3">
+                <div class="feature-card group flex flex-col justify-between rounded-3xl bg-background-light p-10 transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-xl hover:shadow-primary/5 dark:bg-gray-900 dark:hover:bg-gray-800">
+                    <div>
+                        <div class="mb-8 inline-flex size-16 items-center justify-center rounded-2xl bg-primary text-white shadow-lg shadow-primary/20 dark:bg-primary dark:text-background-dark float-medium">
+                            <span class="material-symbols-outlined text-3xl">public</span>
+                        </div>
+                        <h3 class="mb-4 text-2xl font-bold tracking-tight text-dark-charcoal dark:text-white">Menjelajahi &amp; Mengumpulkan</h3>
+                        <p class="text-base leading-7 text-medium-gray dark:text-gray-400 lg:text-lg lg:leading-8">
+                            Sistem kami bekerja tanpa lelah seperti web crawler, secara otomatis menjelajahi dan mengumpulkan ribuan informasi lomba, beasiswa, dan kompetisi dari berbagai portal publik di seluruh Indonesia.
+                        </p>
+                    </div>
+                </div>
+                <div class="feature-card group flex flex-col justify-between rounded-3xl bg-background-light p-10 transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-xl hover:shadow-primary/5 dark:bg-gray-900 dark:hover:bg-gray-800">
+                    <div>
+                        <div class="mb-8 inline-flex size-16 items-center justify-center rounded-2xl bg-primary text-white shadow-lg shadow-primary/20 dark:bg-primary dark:text-background-dark float-slow">
+                            <span class="material-symbols-outlined text-3xl">psychology</span>
+                        </div>
+                        <h3 class="mb-4 text-2xl font-bold tracking-tight text-dark-charcoal dark:text-white">Memahami &amp; Menyusun</h3>
+                        <p class="text-base leading-7 text-medium-gray dark:text-gray-400 lg:text-lg lg:leading-8">
+                            Dengan bantuan kecerdasan buatan (AI), setiap data mentah dianalisis untuk diekstrak detail-detail terpentingnya—seperti kategori, tanggal pendaftaran, dan biaya. Kekacauan informasi diubah menjadi data yang terstruktur dan rapi.
+                        </p>
+                    </div>
+                </div>
+                <div class="feature-card group flex flex-col justify-between rounded-3xl bg-background-light p-10 transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-xl hover:shadow-primary/5 dark:bg-gray-900 dark:hover:bg-gray-800">
+                    <div>
+                        <div class="mb-8 inline-flex size-16 items-center justify-center rounded-2xl bg-primary text-white shadow-lg shadow-primary/20 dark:bg-primary dark:text-background-dark float-fast">
+                            <span class="material-symbols-outlined text-3xl">lightbulb</span>
+                        </div>
+                        <h3 class="mb-4 text-2xl font-bold tracking-tight text-dark-charcoal dark:text-white">Menemukan &amp; Bertindak</h3>
+                        <p class="text-base leading-7 text-medium-gray dark:text-gray-400 lg:text-lg lg:leading-8">
+                            Semua informasi yang telah terkurasi disajikan dalam satu platform di mana kamu bisa mencari, memfilter, dan menemukan peluang yang paling relevan dalam hitungan detik. Setelah menemukan yang kamu cari, kami akan mengarahkanmu langsung ke situs resmi untuk pendaftaran.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="border-y border-gray-100 bg-background-light/50 px-6 py-32 dark:border-gray-800 dark:bg-gray-900/50 lg:px-24">
+        <div class="mx-auto max-w-4xl text-center">
+            <h2 class="mb-6 text-3xl font-extrabold tracking-tight text-primary dark:text-white lg:text-4xl">Transparansi &amp; Apresiasi</h2>
+            <p class="mb-6 text-lg leading-8 text-medium-gray dark:text-gray-400 lg:text-xl lg:leading-8">
+                Untuk menyediakan informasi yang komprehensif dan terpercaya, Jangkau secara aktif mengumpulkan data dari berbagai portal informasi publik. Kami percaya pada ekosistem internet yang terbuka dan kolaboratif.
+            </p>
+            <p class="mb-12 text-lg leading-8 text-medium-gray dark:text-gray-400 lg:text-xl lg:leading-8">
+                Oleh karena itu, kami ingin mengucapkan terima kasih yang sebesar-besarnya kepada para pengelola situs-situs berikut yang telah menjadi pilar utama dalam pengumpulan data kami. Tanpa kerja keras mereka dalam mempublikasikan informasi, Jangkau tidak akan mungkin ada.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="https://www.infolombait.com/" 
+                class="source-capsule rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-semibold text-gray-600 transition hover:border-primary/30 hover:text-primary dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">Info Lomba IT
+                </a>
+            </div>
+        </div>
+    </section>
+    <section class="bg-white px-6 py-32 dark:bg-gray-900 lg:px-24">
+        <div class="mx-auto max-w-7xl">
+            <div class="flex flex-col gap-20 lg:flex-row lg:items-center lg:gap-32">
+                <div class="flex flex-1 justify-center lg:justify-start">
+                    <div class="relative w-full max-w-md">
+                        <!-- Browser Window -->
+                        <div class="browser-mockup rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700">
+                            <!-- Browser Header -->
+                            <div class="flex items-center justify-between rounded-t-2xl bg-gray-50 px-4 py-3 dark:bg-gray-900">
+                                <div class="flex gap-2">
+                                    <div class="size-3 rounded-full bg-red-500"></div>
+                                    <div class="size-3 rounded-full bg-yellow-500"></div>
+                                    <div class="size-3 rounded-full bg-green-500"></div>
+                                </div>
+                                <div class="flex-1 mx-4">
+                                    <div class="rounded bg-gray-200 px-3 py-1 text-center text-xs text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                                        jangkau.com
+                                    </div>
+                                </div>
+                                <div class="w-6"></div>
+                            </div>
+                            
+                            <!-- Website Content -->
+                            <div class="p-6 space-y-6">
+                                <!-- Header -->
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="size-8 rounded bg-primary"></div>
+                                        <div class="h-4 w-16 rounded bg-gray-300 dark:bg-gray-600"></div>
+                                    </div>
+                                    <div class="h-3 w-12 rounded bg-gray-200 dark:bg-gray-700"></div>
+                                </div>
+                                
+                                <!-- Search Bar -->
+                                <div class="flex gap-3">
+                                    <div class="flex-1 h-10 rounded-lg bg-gray-100 dark:bg-gray-700"></div>
+                                    <div class="h-10 w-20 rounded-lg bg-primary"></div>
+                                </div>
+                                
+                                <!-- Filter Tabs -->
+                                <div class="flex gap-2">
+                                    <div class="h-6 w-12 rounded bg-accent"></div>
+                                    <div class="h-6 w-16 rounded bg-gray-200 dark:bg-gray-700"></div>
+                                    <div class="h-6 w-14 rounded bg-gray-200 dark:bg-gray-700"></div>
+                                </div>
+                                
+                                <!-- Competition Cards -->
+                                <div class="space-y-4">
+                                    <div class="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                                        <div class="flex items-start justify-between">
+                                            <div class="space-y-2">
+                                                <div class="h-4 w-32 rounded bg-gray-300 dark:bg-gray-600"></div>
+                                                <div class="h-3 w-24 rounded bg-gray-200 dark:bg-gray-700"></div>
+                                            </div>
+                                            <div class="h-6 w-6 rounded bg-green-500"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                                        <div class="flex items-start justify-between">
+                                            <div class="space-y-2">
+                                                <div class="h-4 w-28 rounded bg-gray-300 dark:bg-gray-600"></div>
+                                                <div class="h-3 w-20 rounded bg-gray-200 dark:bg-gray-700"></div>
+                                            </div>
+                                            <div class="h-6 w-6 rounded bg-blue-500"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Floating Stats -->
+                        <div class="absolute -right-4 -top-2 rounded-lg bg-accent px-3 py-2 shadow-lg float-medium">
+                            <div class="text-xs font-bold text-white">1000+</div>
+                            <div class="text-xs text-white/80">Lomba</div>
+                        </div>
+                        
+                        <div class="absolute -left-4 bottom-4 rounded-lg bg-primary px-3 py-2 shadow-lg float-slow">
+                            <div class="text-xs font-bold text-white">24/7</div>
+                            <div class="text-xs text-white/80">Update</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 space-y-8">
+                    <div class="inline-flex items-center gap-2 rounded-lg bg-accent/10 px-3 py-1 text-sm font-bold uppercase tracking-wider text-accent">
+                        <span class="material-symbols-outlined text-lg">code</span>
+                        Di Balik Proyek
+                    </div>
+                    <h2 class="text-4xl font-extrabold leading-tight text-primary dark:text-white lg:text-5xl">
+                        Dari Eksperimen <br/> Menjadi Platform.
+                    </h2>
+                    <p class="text-lg leading-8 text-medium-gray dark:text-gray-400 lg:text-xl lg:leading-9">
+                        Semuanya berawal dari satu pertanyaan sederhana: 'Bisakah kita menciptakan solusi untuk masalah informasi mahasiswa yang tersebar?'. Apa yang dimulai sebagai proyek pribadi untuk menjawab pertanyaan itu, kini telah berkembang menjadi sebuah platform terbuka. Proyek ini sepenuhnya merupakan inisiatif mandiri dari <a class="inline-block border-b-2 border-primary/20 font-bold text-primary hover:border-primary dark:text-primary transition-all" href="https://bertramrayhan.vercel.app">seorang pengembang</a> yang bersemangat dalam memecahkan masalah dengan teknologi.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="bg-primary px-6 py-32 text-center dark:bg-background-dark lg:px-24 lg:py-40">
+        <div class="mx-auto max-w-5xl space-y-10">
+            <h2 class="text-4xl font-black tracking-tighter text-white lg:text-6xl dark:text-primary">
+                Masa Depan Jangkau <br class="hidden lg:block"/> &amp; Peranmu di Dalamnya.
+            </h2>
+            <div class="mx-auto max-w-4xl space-y-8 text-left lg:text-center">
+                <p class="text-xl font-medium leading-8 text-white/90 lg:text-2xl lg:leading-9">
+                    Jangkau hari ini hanyalah sebuah awal. Visi kami adalah untuk terus berkembang, tidak hanya sebagai direktori lomba, tetapi juga sebagai pusat informasi beasiswa dan magang. Impian terbesarnya? Mungkin suatu hari nanti Jangkau bisa menjadi tempat di mana kamu tidak hanya menemukan peluang, tetapi juga menemukan tim yang solid untuk berjuang bersama.
+                </p>
+                <p class="text-xl font-medium leading-8 text-white/90 lg:text-2xl lg:leading-9">
+                    Visi besar ini tidak mungkin terwujud sendirian.
+                </p>
+                <p class="text-xl font-medium leading-8 text-white/90 lg:text-2xl lg:leading-9">
+                    Jangkau adalah proyek open-source yang digerakkan oleh komunitas. Apakah kamu seorang programmer, desainer, atau hanya seseorang dengan ide cemerlang, kontribusimu sangat kami hargai. Memperbaiki dokumentasi, melaporkan bug, atau bahkan hanya menyarankan sumber data baru—setiap kontribusi berarti.
+                </p>
+                <p class="text-xl font-medium leading-8 text-white/90 lg:text-2xl lg:leading-9">
+                    Jika kamu percaya dengan visi ini dan ingin membantu mewujudkannya, kami mengundangmu untuk bergabung. Mari kita bangun ini bersama.
+                </p>
+            </div>
+            <div class="pt-8">
+                <a href="https://github.com/bertramrayhan/Jangkau" 
+                class="cta-button group inline-flex h-14 items-center justify-center gap-3 rounded-2xl bg-accent px-10 text-lg font-bold text-white shadow-xl transition hover:bg-yellow-500 hover:shadow-2xl hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-yellow-500/30 cursor-pointer">
+                    <span class="material-symbols-outlined transition-transform group-hover:-rotate-12">code</span>
+                    Lihat Kode di GitHub
+                </a>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Parallax and floating effects
+    document.addEventListener('DOMContentLoaded', function() {
+        // Parallax effect for floating elements
+        const parallaxElements = document.querySelectorAll('.parallax-light');
+        
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const rate = scrolled * -0.3;
+            
+            parallaxElements.forEach(element => {
+                element.style.transform = `translateY(${rate}px)`;
+            });
+        });
+        
+        // Enhanced hover effects for feature cards
+        const featureCards = document.querySelectorAll('.feature-card');
+        
+        featureCards.forEach(card => {
+            card.addEventListener('mouseenter', function(e) {
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = (y - centerY) / 10;
+                const rotateY = (centerX - x) / 10;
+                
+                this.style.transform = `translateY(-12px) scale(1.02) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1) rotateX(0) rotateY(0)';
+            });
+        });
+        
+        // Stagger animation for stats badges
+        const statsBadges = document.querySelectorAll('.absolute[class*="rounded-lg bg-"]');
+        statsBadges.forEach((badge, index) => {
+            badge.style.animationDelay = `${index * 0.5}s`;
+        });
+    });
+</script>
+{% endblock %}

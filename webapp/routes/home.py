@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, session
 from sqlalchemy import or_, func
 
 from models import Lomba, Tag
@@ -60,6 +60,8 @@ def index():
 
     pagination = get_filtered_lomba(page, query_param, selected_tags, is_free, lokasi)
     list_lomba = pagination.items
+
+    session['previous_url'] = request.url
 
     if request.headers.get('HX-Request'):
         return render_template(

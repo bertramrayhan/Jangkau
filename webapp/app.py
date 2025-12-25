@@ -1,5 +1,5 @@
-from flask import Flask
-from helpers import convert_to_id_date
+from flask import Flask, Blueprint, render_template
+from helpers import convert_to_id_date, get_domain_from_url
 from routes import home_bp, detail_bp
 from models import db
 import os
@@ -10,18 +10,28 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 db_path = os.path.join(BASE_DIR, '..', 'database', 'jangkau.db')  # satu level ke atas dari webapp
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 db.init_app(app)
 
 with app.app_context():
     db.create_all()
 
-app.jinja_env.filters["convert_to_id_date"] = convert_to_id_date
+def apply_filters(app):
+    app.jinja_env.filters["convert_to_id_date"] = convert_to_id_date
+    app.jinja_env.filters["get_domain_from_url"] = get_domain_from_url
+
+tentang_bp = Blueprint("tentang", __name__)
+@tentang_bp.route("/tentang")
+def index():
+    return render_template('tentang.html')
 
 def register_routes(app):
     app.register_blueprint(home_bp)
     app.register_blueprint(detail_bp)
+    app.register_blueprint(tentang_bp)
 
 if __name__ == '__main__':
+    apply_filters(app)
     register_routes(app)
     app.run(debug=True, port=5000)

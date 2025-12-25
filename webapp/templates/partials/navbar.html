@@ -10,15 +10,96 @@
             </div>
             <!-- Desktop Menu -->
             <div class="hidden md:flex items-center gap-8">
-                <a class="text-primary font-semibold text-sm border-b-2 border-primary pb-0.5" href="/">Lomba</a>
-                <a class="text-dark-charcoal hover:text-primary font-medium text-sm transition-colors" href="#">Tentang Kami</a>
+                <a class="{% if request.endpoint == 'home.index' %}text-primary font-semibold text-sm border-b-2 border-primary pb-0.5{% else %}text-dark-charcoal hover:text-primary font-medium text-sm transition-colors{% endif %}" href="/">Lomba</a>
+                <a class="{% if request.endpoint == 'tentang.index' %}text-primary font-semibold text-sm border-b-2 border-primary pb-0.5{% else %}text-dark-charcoal hover:text-primary font-medium text-sm transition-colors{% endif %}" href="{{ url_for('tentang.index') }}">Tentang Jangkau</a>
             </div>
-            <!-- Mobile Menu Button (Placeholder) -->
+            <!-- Mobile Menu Button -->
             <div class="md:hidden flex items-center">
-                <button class="text-dark-charcoal hover:text-primary">
-                    <span class="material-symbols-outlined">menu</span>
+                <button id="mobile-menu-button" class="text-dark-charcoal hover:text-primary transition-colors duration-200 cursor-pointer">
+                    <span id="menu-icon" class="material-symbols-outlined">menu</span>
                 </button>
             </div>
         </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 bg-white border-t border-gray-100">
+                <a class="{% if request.endpoint == 'home.index' %}bg-primary/10 text-primary font-semibold border-l-4 border-primary{% else %}text-dark-charcoal hover:bg-gray-50 hover:text-primary{% endif %} block px-3 py-2 text-base transition-colors duration-200" href="/">Lomba</a>
+                <a class="{% if request.endpoint == 'tentang.index' %}bg-primary/10 text-primary font-semibold border-l-4 border-primary{% else %}text-dark-charcoal hover:bg-gray-50 hover:text-primary{% endif %} block px-3 py-2 text-base transition-colors duration-200" href="{{ url_for('tentang.index') }}">Tentang Jangkau</a>
+            </div>
+        </div>
     </div>
+
+    <script>
+        // Mobile menu toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuIcon = document.getElementById('menu-icon');
+            
+            mobileMenuButton.addEventListener('click', function() {
+                const isHidden = mobileMenu.classList.contains('hidden');
+                
+                if (isHidden) {
+                    // Show menu with animation
+                    mobileMenu.classList.remove('hidden');
+                    mobileMenu.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                    mobileMenu.style.maxHeight = '0';
+                    mobileMenu.style.opacity = '0';
+                    
+                    // Force reflow then animate
+                    mobileMenu.offsetHeight;
+                    
+                    mobileMenu.style.maxHeight = '200px';
+                    mobileMenu.style.opacity = '1';
+                    
+                    menuIcon.textContent = 'close';
+                } else {
+                    // Hide menu with animation
+                    mobileMenu.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                    mobileMenu.style.maxHeight = '0';
+                    mobileMenu.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        mobileMenu.classList.add('hidden');
+                    }, 300);
+                    
+                    menuIcon.textContent = 'menu';
+                }
+            });
+            
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!mobileMenuButton.contains(event.target) && !mobileMenu.contains(event.target)) {
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                        mobileMenu.style.maxHeight = '0';
+                        mobileMenu.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            mobileMenu.classList.add('hidden');
+                        }, 300);
+                        
+                        menuIcon.textContent = 'menu';
+                    }
+                }
+            });
+            
+            // Close mobile menu when clicking on a link
+            const mobileMenuLinks = mobileMenu.querySelectorAll('a');
+            mobileMenuLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    mobileMenu.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                    mobileMenu.style.maxHeight = '0';
+                    mobileMenu.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        mobileMenu.classList.add('hidden');
+                    }, 300);
+                    
+                    menuIcon.textContent = 'menu';
+                });
+            });
+        });
+    </script>
 </nav>

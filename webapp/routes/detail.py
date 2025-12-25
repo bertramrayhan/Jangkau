@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, url_for
+from flask import Blueprint, render_template, request, url_for, session
 from models import Lomba, Tag
 from sqlalchemy import and_
 
@@ -10,21 +10,8 @@ def index(id):
     
     similar_lomba = get_similar_lomba(lomba, limit=3)
 
-    # Dapatkan referrer URL (halaman sebelumnya)
-    referrer = request.headers.get('Referer')
-    
-    # Logic untuk back_url yang smart
-    # 1. Jika ada parameter 'from' di URL, gunakan itu
-    from_url = request.args.get('from')
-    if from_url:
-        back_url = from_url
-    # 2. Jika referrer dari halaman home, gunakan itu
-    elif referrer and request.host in referrer and not '/detail/' in referrer:
-        back_url = referrer
-    # 3. Default ke home
-    else:
-        back_url = url_for('home.index')
-    
+    back_url = session.get('previous_url', url_for('home.index'))
+
     return render_template('detail.html', lomba=lomba, back_url=back_url, similar_lomba=similar_lomba)
 
 def get_similar_lomba(current_lomba, limit=3):

@@ -1,6 +1,7 @@
 from babel.dates import format_date
 from datetime import datetime, date
 import sqlite3, os
+from urllib.parse import urlparse
 
 from dotenv import load_dotenv
 
@@ -32,3 +33,27 @@ def get_db_connection():
 
 def get_db_path():
     return DB_PATH
+
+
+def get_domain_from_url(url):
+    """
+    Mengekstrak nama domain bersih dari sebuah URL lengkap.
+    Contoh: 'https://www.lomba-keren.com/path?query=1' -> 'lomba-keren.com'
+    """
+    if not url:
+        return None
+    try:
+        # 1. Parse URL
+        parsed_url = urlparse(url)
+        
+        # 2. Ambil netloc (e.g., 'www.lomba-keren.com')
+        netloc = parsed_url.netloc
+        
+        # 3. Hapus 'www.' jika ada
+        if netloc.startswith('www.'):
+            netloc = netloc[4:]
+            
+        return netloc
+    except Exception:
+        # Jika URL tidak valid, kembalikan None
+        return None
