@@ -33,9 +33,6 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 db.init_app(app)
 
-with app.app_context():
-    db.create_all()
-
 def apply_filters(app):
     app.jinja_env.filters["convert_to_id_date"] = convert_to_id_date
     app.jinja_env.filters["get_domain_from_url"] = get_domain_from_url
@@ -50,7 +47,8 @@ def register_routes(app):
     app.register_blueprint(detail_bp)
     app.register_blueprint(tentang_bp)
 
+apply_filters(app)
+register_routes(app)
+
 if __name__ == '__main__':
-    apply_filters(app)
-    register_routes(app)
     app.run(debug=True, port=5000)
