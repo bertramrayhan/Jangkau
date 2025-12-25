@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, session
 from sqlalchemy import or_, func
+from datetime import datetime
 
 from models import Lomba, Tag
 
@@ -8,6 +9,10 @@ home_bp = Blueprint("home", __name__)
 def get_filtered_lomba(page, query_param, selected_tags, is_free, lokasi):
     PER_PAGE = 6
     base_query = Lomba.query
+
+    # Filter hanya lomba yang registration_end belum lewat (masih bisa daftar)
+    today = datetime.now().date()
+    base_query = base_query.filter(Lomba.registration_end >= today)
 
     if is_free is not None:
         base_query = base_query.filter(Lomba.is_free == is_free)
