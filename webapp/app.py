@@ -2,13 +2,32 @@ from flask import Flask, Blueprint, render_template
 from helpers import convert_to_id_date, get_domain_from_url
 from routes import home_bp, detail_bp
 from models import db
+from dotenv import load_dotenv
 import os
+
+load_dotenv()
 
 app = Flask(__name__)
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-db_path = os.path.join(BASE_DIR, '..', 'database', 'jangkau.db')  # satu level ke atas dari webapp
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+ENV = os.getenv('FLASK_ENV', 'development')
+
+if ENV == 'production':
+    # MODE PRODUKSI (saat di Vercel)
+    print("🚀 Running in PRODUCTION mode. Connecting to Postgres...")
+    db_url = os.getenv('DATABASE_URL')
+    
+    # Perbaikan kecil: SQLAlchemy lebih suka 'postgresql://' daripada 'postgres://'
+    if db_url and db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+    
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+else:
+    # MODE PENGEMBANGAN (saat di komputer lokal)
+    print("💻 Running in DEVELOPMENT mode. Connecting to SQLite...")
+    BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+    db_path = os.path.join(BASE_DIR, '..', 'database', 'jangkau.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
