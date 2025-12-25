@@ -1,0 +1,78 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}404 - Halaman Tidak Ditemukan - Jangkau{% endblock %}
+
+{% block content %}
+<section class="w-full bg-background-light py-16 md:py-24 px-4 flex-grow flex items-center justify-center">
+    <div class="max-w-2xl mx-auto text-center flex flex-col items-center gap-8">
+        <!-- Error Icon -->
+        <div class="w-32 h-32 bg-primary/10 rounded-full flex items-center justify-center">
+            <span class="material-symbols-outlined text-primary text-6xl">error_outline</span>
+        </div>
+        
+        <!-- Error Code -->
+        <div class="space-y-4">
+            <h1 class="text-8xl md:text-9xl font-extrabold text-primary/20 leading-none">404</h1>
+            <h2 class="text-3xl md:text-4xl font-bold text-primary leading-tight">
+                Halaman Tidak Ditemukan
+            </h2>
+        </div>
+        
+        <!-- Description -->
+        <p class="text-medium-gray text-base md:text-lg max-w-lg leading-relaxed">
+            Maaf, halaman yang Anda cari tidak dapat ditemukan. Mungkin halaman telah dipindahkan, 
+            dihapus, atau URL yang Anda masukkan tidak benar.
+        </p>
+        
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row gap-4 mt-6">
+            <!-- Back Button -->
+            <button onclick="history.back()" 
+                    class="px-6 py-3 bg-white border border-gray-200 text-dark-charcoal rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium flex items-center gap-2 justify-center cursor-pointer">
+                <span class="material-symbols-outlined text-lg">arrow_back</span>
+                Kembali
+            </button>
+            
+            <!-- Home Button -->
+            <a href="{{ url_for('home.index') }}" 
+               class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-200 font-medium flex items-center gap-2 justify-center">
+                <span class="material-symbols-outlined text-lg">home</span>
+                Ke Beranda
+            </a>
+        </div>
+        
+        <!-- Search Suggestion -->
+        <div class="mt-8 p-6 bg-white border border-gray-200 rounded-lg max-w-lg w-full">
+            <h3 class="font-semibold text-dark-charcoal mb-3 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">search</span>
+                Coba Cari Lomba
+            </h3>
+            <div class="relative">
+                <input type="search" 
+                       class="block w-full pl-4 pr-4 py-3 bg-white border border-gray-200 rounded-lg text-dark-charcoal placeholder-gray-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm" 
+                       placeholder="Cari lomba, beasiswa, atau kompetisi..."
+                       onkeypress="if(event.key === 'Enter') { window.location.href = '{{ url_for('home.index') }}?q=' + encodeURIComponent(this.value); }"/>
+            </div>
+        </div>
+        
+        <!-- Popular Links -->
+        <div class="mt-6">
+            <p class="text-sm text-medium-gray mb-3">Atau kunjungi:</p>
+            <div class="flex flex-wrap gap-2 justify-center">
+                <a href="{{ url_for('home.index') }}?tags=Mahasiswa" 
+                   class="px-3 py-2 bg-primary/10 text-primary rounded-lg text-sm hover:bg-primary/20 transition-colors">
+                   Mahasiswa
+                </a>
+                <a href="{{ url_for('home.index') }}?tags=Umum" 
+                   class="px-3 py-2 bg-primary/10 text-primary rounded-lg text-sm hover:bg-primary/20 transition-colors">
+                   Umum
+                </a>
+                <a href="{{ url_for('home.index') }}?tags=Programming" 
+                   class="px-3 py-2 bg-primary/10 text-primary rounded-lg text-sm hover:bg-primary/20 transition-colors">
+                   Programming
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
