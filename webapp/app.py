@@ -9,7 +9,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-ENV = os.getenv('FLASK_ENV', 'development')
+ENV = os.getenv('APP_ENV', 'development')
 
 if ENV == 'production':
     # MODE PRODUKSI (saat di Vercel)

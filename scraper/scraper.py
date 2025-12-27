@@ -4,12 +4,49 @@ from google.genai import types
 import json, os, sqlite3, time, requests, re
 from urllib.parse import quote_plus
 from dotenv import load_dotenv
+import sys
+from database.models import Lomba, Tag, get_engine_and_session
+from datetime import datetime
+from sqlalchemy import Date, DateTime
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = os.path.abspath(os.path.join(current_dir, '..'))
+sys.path.append(root_dir)
+
+errors = []
 
 class JangkauScraper:
     def __init__(self):
-        load_dotenv(dotenv_path='.env')
+        load_dotenv()
 
-        self.DB_PATH = os.getenv('DB_PATH')
+        APP_ENV = os.getenv('APP_ENV', 'development').lower()
+        
+        self.DATABASE_URL = None
+        
+        if APP_ENV == 'production':
+            # Di mode produksi (misal: di GitHub Actions), WAJIB ada DATABASE_URL
+            print("🚀 Scraper running in PRODUCTION mode.")
+            DATABASE_URL = os.getenv('DATABASE_URL')
+            if not DATABASE_URL:
+                raise ValueError("❌ ERROR: DATABASE_URL must be set in production environment!")
+            
+            # Perbaikan untuk URL Heroku/Neon
+            if DATABASE_URL.startswith("postgres://"):
+                DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+        else: # (if APP_ENV == 'development' or lainnya)
+            # Di mode development, kita buat URL SQLite secara otomatis.
+            print("💻 Scraper running in DEVELOPMENT mode.")
+            db_path = os.path.join(root_dir, 'database', 'jangkau.db')
+            DATABASE_URL = f"sqlite:///{db_path}"
+
+        if not DATABASE_URL:
+            raise ValueError("❌ ERROR: Could not determine DATABASE_URL!")
+
+        # Buat engine dan simpan 'Session' class untuk digunakan nanti
+        self.engine, self.Session = get_engine_and_session(DATABASE_URL)
+        print(f"Scraper terhubung ke database: {self.engine.url.database}")
+
         self.base_url = 'https://www.infolombait.com/'
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
@@ -33,82 +70,67 @@ class JangkauScraper:
         self.current_model_index = 0
 
     def simpan_ke_db(self, data_terstruktur):
-        """Menyimpan data lomba yang sudah terstruktur ke database SQLite."""
-        print(f"\n--- Menyimpan data untuk '{data_terstruktur.get('title', 'Tanpa Judul')}' ke database... ---")
+        """
+        Menyimpan data lomba yang sudah terstruktur ke database menggunakan SQLAlchemy.
+        Metode ini bersifat 'agnostik' terhadap database (bisa SQLite atau PostgreSQL).
+        """
+        print(f"\n--- Menyimpan '{data_terstruktur.get('title', 'Tanpa Judul')}' via SQLAlchemy... ---")
         
-        conn = None
+        session = self.Session()
+        
         try:
-            conn = sqlite3.connect(self.DB_PATH)
-            cursor = conn.cursor()
-
-            # --- LANGKAH 1: Masukkan data utama ke tabel 'lomba' ---
-            
-            # Perbaikan: Menambahkan semua kolom yang relevan
-            sql_insert_lomba = """
-            INSERT INTO lomba (
-                title, source_url, raw_description, organizer, 
-                registration_start, registration_end, event_start, event_end,
-                is_free, price_details, location, location_details, registration_link
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """
-            
-            # Perbaikan: Menambahkan semua nilai yang sesuai ke dalam tuple
-            lomba_data_tuple = (
-                data_terstruktur.get('title'),
-                data_terstruktur.get('source_url'),
-                data_terstruktur.get('raw_description'),
-                data_terstruktur.get('organizer'),
-                data_terstruktur.get('registration_start'),
-                data_terstruktur.get('registration_end'),
-                data_terstruktur.get('event_start'),
-                data_terstruktur.get('event_end'),
-                data_terstruktur.get('is_free'),
-                data_terstruktur.get('price_details'),
-                data_terstruktur.get('location'),
-                data_terstruktur.get('location_details'),
-                data_terstruktur.get('registration_link')
-            )
-            
             url_sumber = data_terstruktur.get('source_url')
-            # Eksekusi perintah SQL
-            # Kita akan menggunakan pendekatan SELECT dulu untuk pesan log yang lebih baik
-            cursor.execute("SELECT id FROM lomba WHERE source_url = ?", (url_sumber,))
-            existing_lomba = cursor.fetchone()
-
-            if existing_lomba:
-                print(f"ℹ️ Data lomba dengan URL {url_sumber} sudah ada di database. Proses penyimpanan dilewati.")
+            if not url_sumber:
+                print("⚠️ Peringatan: Data tidak memiliki 'source_url'. Dilewati.")
+                session.close()
                 return
 
-            cursor.execute(sql_insert_lomba, lomba_data_tuple)
-            lomba_id = cursor.lastrowid
+            existing_lomba = session.query(Lomba).filter_by(source_url=url_sumber).first()
             
-            # --- LANGKAH 2: Tangani Tags (Bagian Many-to-Many) ---
-            tag_list = data_terstruktur.get('tags', [])
-            if tag_list:
-                for tag_name in tag_list:
-                    # Dapatkan ID dari tag yang sudah ada (karena kita sudah pre-seed)
-                    cursor.execute("SELECT id FROM tags WHERE name = ?", (tag_name,))
-                    tag_id_result = cursor.fetchone()
+            if existing_lomba:
+                print(f"ℹ️ Lomba dengan URL ini sudah ada (ID: {existing_lomba.id}). Dilewati.")
+                session.close()
+                return
+
+            for col in Lomba.__table__.columns:
+                if isinstance(col.type, (Date, DateTime)):
+                    col_name = col.name
+                    date_str = data_terstruktur.get(col_name)
                     
-                    if tag_id_result:
-                        tag_id = tag_id_result[0]
-                        # Buat relasi di tabel jembatan 'lomba_tags'
-                        cursor.execute("INSERT OR IGNORE INTO lomba_tags (lomba_id, tag_id) VALUES (?, ?)", (lomba_id, tag_id))
-                    else:
-                        # Fallback jika AI memberikan tag yang tidak ada di daftar kita
-                        print(f"⚠️ Peringatan: Tag '{tag_name}' dari AI tidak ditemukan di tabel 'tags'. Tag ini akan diabaikan.")
+                    if isinstance(date_str, str):
+                        try:
+                            data_terstruktur[col_name] = datetime.strptime(date_str, '%Y-%m-%d').date()
+                        except ValueError:
+                            print(f"⚠️ Peringatan: Format tanggal salah untuk '{col_name}': '{date_str}'. Menggunakan null.")
+                            data_terstruktur[col_name] = None
 
-            conn.commit()
-            print(f"✅ Data berhasil disimpan dengan ID Lomba: {lomba_id}")
+            data_terstruktur.pop('id_lomba_input')
 
-        except sqlite3.Error as e:
-            print(f"❌ Terjadi error database: {e}")
-            if conn:
-                conn.rollback()
+            tags_from_ai = data_terstruktur.pop('tags', [])
+
+            lomba_baru = Lomba(**data_terstruktur)
+
+            if tags_from_ai:
+                valid_tags = session.query(Tag).filter(Tag.name.in_(tags_from_ai)).all()
                 
+                if valid_tags:
+                    lomba_baru.tags.extend(valid_tags)
+                    
+                    found_tag_names = {tag.name for tag in valid_tags}
+                    print(f"  -> Menambahkan relasi dengan tags: {', '.join(found_tag_names)}")
+
+            session.add(lomba_baru)
+            
+            session.commit()
+            
+            print(f"✅ Data berhasil disimpan dengan ID Lomba baru: {lomba_baru.id}")
+
+        except Exception as e:
+            print(f"❌ Terjadi error database saat menyimpan: {e}")
+            errors.append(e)
+            session.rollback()
         finally:
-            if conn:
-                conn.close()
+            session.close()
 
     def get_batch_prompt(self, batch_lomba_mentah):
         batch_text_input = ""
@@ -341,6 +363,8 @@ class JangkauScraper:
             except Exception as e:
                 print(f"\n❌ Terjadi sebuah error: {e}")
             finally:
+                print(errors)
+
                 page_count += 1
                 last_timestamp = None 
 

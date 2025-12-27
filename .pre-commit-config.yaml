@@ -1,0 +1,26 @@
+# 'repos' adalah daftar dari repositori yang berisi hook yang ingin kita gunakan.
+repos:
+
+# '- repo: local' berarti kita tidak mengunduh hook dari internet (seperti GitHub),
+#   melainkan kita mendefinisikan hook yang ada di dalam proyek kita sendiri.
+-   repo: local
+
+    # 'hooks' adalah daftar dari hook yang ingin kita jalankan dari 'repo' ini.
+    hooks:
+
+    # Ini adalah hook pertama kita. Tanda '-' menandakan item dalam sebuah daftar.
+    -   id: sync-flask-model          # Nama unik untuk hook ini, bisa apa saja.
+        name: Sync Flask Database Model # Nama yang akan muncul di terminal saat hook berjalan.
+        entry: python sync_models.py    # Perintah yang akan dieksekusi.
+        language: system                # Memberitahu pre-commit untuk menggunakan Python yang ada di sistem/venv Anda.
+        stages: [pre-commit]                # Kapan hook ini dijalankan? Saat 'git commit'.
+        always_run: true                # Selalu jalankan hook ini setiap commit, jangan coba-coba dilewati.
+        pass_filenames: false           # Jangan berikan daftar file yang di-commit ke skrip (tidak kita butuhkan).
+
+    # Ini adalah hook kedua kita, yang berjalan SETELAH hook pertama.
+    -   id: add-synced-model
+        name: Add synchronized model to git
+        entry: git add webapp/models.py # Perintahnya adalah 'git add' untuk file spesifik ini.
+        language: system
+        stages: [pre-commit]
+        pass_filenames: false
