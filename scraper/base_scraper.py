@@ -1,73 +1,82 @@
-from bs4 import BeautifulSoup
+import os
+import sys
+import json
+import time
+from abc import ABC, abstractmethod
+from datetime import datetime
+
+from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-import json, os, sqlite3, time, requests, re
-from urllib.parse import quote_plus
-from dotenv import load_dotenv
-import sys
-from database.models import Lomba, Tag, get_engine_and_session
-from datetime import datetime
 from sqlalchemy import Date, DateTime
 
+# --- Path setup ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = os.path.abspath(os.path.join(current_dir, '..'))
+root_dir = os.path.abspath(os.path.join(current_dir, '..', '..'))
 sys.path.append(root_dir)
 
-errors = []
+from database.models import Lomba, Tag, get_engine_and_session
 
-class JangkauScraper:
-    def __init__(self):
-        load_dotenv()
-
-        APP_ENV = os.getenv('APP_ENV', 'development').lower()
-        
-        self.DATABASE_URL = None
-        
-        if APP_ENV == 'production':
-            # Di mode produksi (misal: di GitHub Actions), WAJIB ada DATABASE_URL
-            print("🚀 Scraper running in PRODUCTION mode.")
-            DATABASE_URL = os.getenv('DATABASE_URL')
-            if not DATABASE_URL:
-                raise ValueError("❌ ERROR: DATABASE_URL must be set in production environment!")
-            
-            # Perbaikan untuk URL Heroku/Neon
-            if DATABASE_URL.startswith("postgres://"):
-                DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-
-        else: # (if APP_ENV == 'development' or lainnya)
-            # Di mode development, kita buat URL SQLite secara otomatis.
-            print("💻 Scraper running in DEVELOPMENT mode.")
-            db_path = os.path.join(root_dir, 'database', 'jangkau.db')
-            DATABASE_URL = f"sqlite:///{db_path}"
-
-        if not DATABASE_URL:
-            raise ValueError("❌ ERROR: Could not determine DATABASE_URL!")
-
-        # Buat engine dan simpan 'Session' class untuk digunakan nanti
-        self.engine, self.Session = get_engine_and_session(DATABASE_URL)
-        print(f"Scraper terhubung ke database: {self.engine.url.database}")
-
-        self.base_url = 'https://www.infolombait.com/'
-        self.headers = {
+class BaseScraper(ABC):
+    HEADERS = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
-        self.BATCH_SIZE = 5
-        self.MAX_PAGE = 5
-        self.model_list = [
-            # --- Pilihan Utama (Cepat dan Cukup Cerdas) ---
-            'models/gemini-flash-latest',
-            'models/gemini-2.5-flash',
-            
-            # --- Pilihan Kedua (Lebih Cerdas, Mungkin Sedikit Lebih Lambat) ---
-            'models/gemini-pro-latest',
-            'models/gemini-2.5-pro',
-            
-            # --- Pilihan Cadangan (Model Gemma, lebih kecil) ---
-            # Mungkin tidak seakurat Gemini, tapi patut dicoba jika yang lain gagal
-            'models/gemma-3-12b-it', 
-            'models/gemma-3-4b-it',
-        ]
+    BATCH_SIZE = 5
+    MODEL_LIST = [
+        # --- Pilihan Utama (Cepat dan Cukup Cerdas) ---
+        'models/gemini-flash-latest',
+        'models/gemini-2.5-flash',
+        
+        # --- Pilihan Kedua (Lebih Cerdas, Mungkin Sedikit Lebih Lambat) ---
+        'models/gemini-pro-latest',
+        'models/gemini-2.5-pro',
+        
+        # --- Pilihan Cadangan (Model Gemma, lebih kecil) ---
+        # Mungkin tidak seakurat Gemini, tapi patut dicoba jika yang lain gagal
+        'models/gemma-3-12b-it', 
+        'models/gemma-3-4b-it',
+    ]
+
+    def __init__(self):
+        """
+        Konstruktor umum yang menangani koneksi database dan konfigurasi AI.
+        """
+        load_dotenv()
+                
+        # State dinamis yang unik untuk setiap instance
         self.current_model_index = 0
+        
+        # --- Konfigurasi Database ---
+        APP_ENV = os.getenv('APP_ENV', 'development').lower()
+        self.DATABASE_URL = None 
+
+        if APP_ENV == 'production':
+            print(f"🚀 {self.__class__.__name__} running in PRODUCTION mode.")
+            self.DATABASE_URL = os.getenv('DATABASE_URL')
+            if not self.DATABASE_URL:
+                raise ValueError("❌ ERROR: DATABASE_URL must be set in production environment!")
+            if self.DATABASE_URL.startswith("postgres://"):
+                self.DATABASE_URL = self.DATABASE_URL.replace("postgres://", "postgresql://", 1)
+        else: # (development)
+            print(f"💻 {self.__class__.__name__} running in DEVELOPMENT mode.")
+            
+            # 1. Buat path relatif langsung dari direktori kerja (root proyek).
+            relative_db_path = os.path.join('database', 'jangkau.db')
+            
+            # 2. Ubah menjadi path absolut untuk kepastian.
+            absolute_db_path = os.path.abspath(relative_db_path)
+            
+            # 3. Buat URL database.
+            self.DATABASE_URL = f"sqlite:///{absolute_db_path}"
+
+        if not self.DATABASE_URL:
+            raise ValueError("❌ ERROR: Could not determine DATABASE_URL!")
+
+        # Gunakan properti instance untuk membuat engine dan session
+        self.engine, self.Session = get_engine_and_session(self.DATABASE_URL)
+        
+        print(f"Scraper terhubung ke database: {self.engine.url.database}")
+
 
     def simpan_ke_db(self, data_terstruktur):
         """
@@ -127,7 +136,6 @@ class JangkauScraper:
 
         except Exception as e:
             print(f"❌ Terjadi error database saat menyimpan: {e}")
-            errors.append(e)
             session.rollback()
         finally:
             session.close()
@@ -203,11 +211,11 @@ class JangkauScraper:
     def strukturkan_dengan_ai(self, batch_lomba_mentah):
         print("\n--- Menghubungi AI untuk menstrukturkan data (Cara Terbaru)... ---")
         
-        if self.current_model_index >= len(self.model_list):
+        if self.current_model_index >= len(self.MODEL_LIST):
             print("❌ Semua model telah mencapai rate limit. Tidak bisa memproses batch ini.")
             return None
 
-        current_model_name = self.model_list[self.current_model_index]
+        current_model_name = self.MODEL_LIST[self.current_model_index]
         print(f"\n--- Menghubungi AI (Mencoba Model: {current_model_name}) ---")
 
         prompt = self.get_batch_prompt(batch_lomba_mentah)
@@ -249,135 +257,22 @@ class JangkauScraper:
                     return None # Langsung return None, jangan break
         return None
 
-    def traverse_url(self, title, url):
-        print(f"Mengambil deskripsi lomba dari satu halaman: {url}" )
+    # --- Metode dan properti Abstrak (Wajib diimplementasikan oleh anak) ---
 
-        data_lomba = {
-            'title': title,
-            'url': url
-        }
+    @property
+    @abstractmethod
+    def base_url(self):
+        """
+        Setiap scraper spesialis WAJIB mendefinisikan URL dasar
+        situs yang akan di-scrape.
+        """
+        pass
 
-        try:
-            response = requests.get(url, headers=self.headers, timeout=15)
-            response.raise_for_status()
-
-            soup = BeautifulSoup(response.text, 'html.parser')
-
-            deskripsi_lomba_scope = soup.select_one('div.entry-content')
-
-            if deskripsi_lomba_scope:
-                print(f"\n✅ Berhasil menemukan deskripsi lomba:")
-
-                deskripsi_lomba_tags = deskripsi_lomba_scope.select('p')
-                print(f"\n--- Memulai Investigasi {len(deskripsi_lomba_tags)} Paragraf ---")
-
-                final_description_parts = []
-
-                for i, p_tag in enumerate(deskripsi_lomba_tags):
-                    
-                    text = ''
-
-                    if not p_tag.get_text(strip=True):
-                        final_description_parts.append('\n') 
-                        continue
-                    else:
-                        text = p_tag.get_text(strip=True)
-                        final_description_parts.append(text)
-
-                    final_description_parts.append('\n') 
-
-                deskripsi_lomba = ''.join(final_description_parts)
-
-                deskripsi_lomba_bersih = re.sub(r'\n{3,}', '\n\n', deskripsi_lomba)
-
-                data_lomba['description'] = deskripsi_lomba_bersih
-                return data_lomba
-            else:
-                print("\n❌ Gagal menemukan deskripsi lomba dengan selector yang digunakan.")
-                print("    Mungkin struktur HTML situs telah berubah. Perlu investigasi ulang.")
-
-        except requests.exceptions.RequestException as e:
-            print(f"\n❌ Gagal melakukan request ke URL. Error: {e}")
-        except Exception as e:
-            print(f"\n❌ Terjadi sebuah error: {e}")
-
-    def run(self):
-        print(f"Mengambil daftar lomba dari halaman utama: {self.base_url}" )
-
-        page_count = 0
-        next_page_url = self.base_url
-        while page_count < self.MAX_PAGE:
-            print(f"\n------HALAMAN {page_count + 1}------\n")
-            lomba_terakhir = None
-            try:
-                response = requests.get(next_page_url, headers=self.headers, timeout=15)
-                response.raise_for_status()
-
-                soup = BeautifulSoup(response.text, 'html.parser')
-                
-                list_lomba = soup.select('article')
-
-                if list_lomba:
-                    if page_count == 0:
-                        lomba_terakhir = list_lomba[5]
-                    else:
-                        lomba_terakhir = list_lomba[-1]
-
-                    print(f"\n✅ Berhasil menemukan {len(list_lomba)} lomba:")
-                    
-                    batch_lomba_mentah = []
-
-                    for lomba in list_lomba:
-                        lomba_url_tag = lomba.select_one('h2.entry-title a');
-
-                        lomba_title = lomba_url_tag.text.strip()
-                        lomba_url = lomba_url_tag['href'];
-
-                        print(f"  - Judul: {lomba_title}")
-                        print(f"    Link: {lomba_url}")
-
-                        data_mentah = self.traverse_url(lomba_title, lomba_url)
-                        batch_lomba_mentah.append(data_mentah)
-                        time.sleep(1.5)
-
-                    for i in range(0, len(batch_lomba_mentah), self.BATCH_SIZE):
-                        current_batch = batch_lomba_mentah[i:i + self.BATCH_SIZE]
-
-                        batch_data_terstruktur = self.strukturkan_dengan_ai(current_batch)
-                        
-                        if batch_data_terstruktur:
-                            for data_terstruktur in batch_data_terstruktur:
-                                if data_terstruktur:
-                                    print(json.dumps(data_terstruktur, indent=2, ensure_ascii=False))
-
-                                    self.simpan_ke_db(data_terstruktur)
-                        else:
-                            print("⚠️ Panggilan AI gagal tanpa error spesifik, mencoba lagi...")
-                    
-                else:
-                    print("\n❌ Gagal menemukan link lomba dengan selector yang digunakan.")
-                    print("    Mungkin struktur HTML situs telah berubah. Perlu investigasi ulang.")
-
-            except requests.exceptions.RequestException as e:
-                print(f"\n❌ Gagal melakukan request ke URL. Error: {e}")
-            except Exception as e:
-                print(f"\n❌ Terjadi sebuah error: {e}")
-            finally:
-                print(errors)
-
-                page_count += 1
-                last_timestamp = None 
-
-                timestamp_tag = lomba_terakhir.select_one('abbr.published.timeago')
-                if timestamp_tag:
-                    last_timestamp = timestamp_tag['title']
-                
-                if last_timestamp:
-                    encoded_timestamp = quote_plus(last_timestamp)
-                    
-                    next_page_url = f"https://www.infolombait.com/search?updated-max={encoded_timestamp}&max-results=6#PageNo={page_count + 1}"
-                    print(f"\n--- Halaman berikutnya ditemukan: {next_page_url} ---" )
-
-                else:
-                    print("\n--- Tidak ada lagi halaman berikutnya. Proses selesai. ---")
-                    break # Keluar dari loop 'while True:'
+    @abstractmethod
+    def scrape(self):
+        """
+        Metode utama yang harus diimplementasikan oleh setiap scraper spesialis.
+        Tugasnya adalah melakukan scraping dan memanggil metode umum seperti
+        strukturkan_dengan_ai() dan simpan_ke_db().
+        """
+        pass
