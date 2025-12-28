@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from sqlalchemy import Date, DateTime
+from config.logging_config import logger
 
 # --- Path setup ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -42,7 +43,7 @@ class BaseScraper(ABC):
         Konstruktor umum yang menangani koneksi database dan konfigurasi AI.
         """
         load_dotenv()
-                
+
         # State dinamis yang unik untuk setiap instance
         self.current_model_index = 0
         
@@ -51,14 +52,14 @@ class BaseScraper(ABC):
         self.DATABASE_URL = None 
 
         if APP_ENV == 'production':
-            print(f"🚀 {self.__class__.__name__} running in PRODUCTION mode.")
+            logger.info(f"🚀 {self.__class__.__name__} running in PRODUCTION mode.")
             self.DATABASE_URL = os.getenv('DATABASE_URL')
             if not self.DATABASE_URL:
                 raise ValueError("❌ ERROR: DATABASE_URL must be set in production environment!")
             if self.DATABASE_URL.startswith("postgres://"):
                 self.DATABASE_URL = self.DATABASE_URL.replace("postgres://", "postgresql://", 1)
         else: # (development)
-            print(f"💻 {self.__class__.__name__} running in DEVELOPMENT mode.")
+            logger.info(f"💻 {self.__class__.__name__} running in DEVELOPMENT mode.")
             
             # 1. Buat path relatif langsung dari direktori kerja (root proyek).
             relative_db_path = os.path.join('database', 'jangkau.db')
@@ -75,29 +76,46 @@ class BaseScraper(ABC):
         # Gunakan properti instance untuk membuat engine dan session
         self.engine, self.Session = get_engine_and_session(self.DATABASE_URL)
         
-        print(f"Scraper terhubung ke database: {self.engine.url.database}")
+        logger.info(f"Scraper terhubung ke database: {self.engine.url.database}")
 
+        self.VALID_TAGS = self._get_valid_tags()
+        if self.VALID_TAGS:
+            logger.info(f"   -> Berhasil memuat {len(self.VALID_TAGS)} tag yang valid dari database.")
+        else:
+            logger.warning("   -> ⚠️ Peringatan: Tidak ada tag yang dimuat dari database.")
+
+    def _get_valid_tags(self):
+        """Mengambil semua tag dari database satu kali saat inisialisasi."""
+        session = self.Session()
+        try:
+            tags = session.query(Tag).all()
+            return [tag.name for tag in tags] # Kembalikan daftar string nama tag
+        except Exception as e:
+            logger.error(f"❌ Terjadi error saat memuat tag dari database: {e}")
+            return []
+        finally:
+            session.close()
 
     def simpan_ke_db(self, data_terstruktur):
         """
         Menyimpan data lomba yang sudah terstruktur ke database menggunakan SQLAlchemy.
         Metode ini bersifat 'agnostik' terhadap database (bisa SQLite atau PostgreSQL).
         """
-        print(f"\n--- Menyimpan '{data_terstruktur.get('title', 'Tanpa Judul')}' via SQLAlchemy... ---")
+        logger.info(f"\n--- Menyimpan '{data_terstruktur.get('title', 'Tanpa Judul')}' via SQLAlchemy... ---")
         
         session = self.Session()
         
         try:
             url_sumber = data_terstruktur.get('source_url')
             if not url_sumber:
-                print("⚠️ Peringatan: Data tidak memiliki 'source_url'. Dilewati.")
+                logger.warning("⚠️ Peringatan: Data tidak memiliki 'source_url'. Dilewati.")
                 session.close()
                 return
 
             existing_lomba = session.query(Lomba).filter_by(source_url=url_sumber).first()
             
             if existing_lomba:
-                print(f"ℹ️ Lomba dengan URL ini sudah ada (ID: {existing_lomba.id}). Dilewati.")
+                logger.info(f"ℹ️ Lomba dengan URL ini sudah ada (ID: {existing_lomba.id}). Dilewati.")
                 session.close()
                 return
 
@@ -110,7 +128,7 @@ class BaseScraper(ABC):
                         try:
                             data_terstruktur[col_name] = datetime.strptime(date_str, '%Y-%m-%d').date()
                         except ValueError:
-                            print(f"⚠️ Peringatan: Format tanggal salah untuk '{col_name}': '{date_str}'. Menggunakan null.")
+                            logger.warning(f"⚠️ Peringatan: Format tanggal salah untuk '{col_name}': '{date_str}'. Menggunakan null.")
                             data_terstruktur[col_name] = None
 
             data_terstruktur.pop('id_lomba_input')
@@ -126,16 +144,16 @@ class BaseScraper(ABC):
                     lomba_baru.tags.extend(valid_tags)
                     
                     found_tag_names = {tag.name for tag in valid_tags}
-                    print(f"  -> Menambahkan relasi dengan tags: {', '.join(found_tag_names)}")
+                    logger.info(f"  -> Menambahkan relasi dengan tags: {', '.join(found_tag_names)}")
 
             session.add(lomba_baru)
             
             session.commit()
             
-            print(f"✅ Data berhasil disimpan dengan ID Lomba baru: {lomba_baru.id}")
+            logger.info(f"✅ Data berhasil disimpan dengan ID Lomba baru: {lomba_baru.id}")
 
         except Exception as e:
-            print(f"❌ Terjadi error database saat menyimpan: {e}")
+            logger.error(f"❌ Terjadi error database saat menyimpan: {e}")
             session.rollback()
         finally:
             session.close()
@@ -154,15 +172,8 @@ class BaseScraper(ABC):
 
             """
 
-        # Daftar tag kita definisikan di sini agar mudah dikelola
-        daftar_tag_valid = [
-            "Programming", "Hackathon", "CTF", "Data Science", "UI/UX Design", 
-            "Desain Grafis", "Business Case", "Debat", "Menulis Esai", "Robotika", 
-            "Mahasiswa", "SMA", "Umum", "Gratis", "Berbayar", "Online", "Offline", "Hybrid"
-        ]
-        
         # Mengubah daftar tag menjadi string untuk dimasukkan ke dalam prompt
-        tags_string = ", ".join([f'"{tag}"' for tag in daftar_tag_valid])
+        tags_string = ", ".join([f'"{tag_name}"' for tag_name in self.VALID_TAGS])
 
         return f"""
         PERAN: Anda adalah sebuah API pemrosesan batch yang sangat akurat. Tugas Anda adalah menerima serangkaian data acara, dan mengembalikan sebuah ARRAY JSON yang berisi hasil ekstraksi untuk SETIAP acara.
@@ -209,14 +220,14 @@ class BaseScraper(ABC):
         """
 
     def strukturkan_dengan_ai(self, batch_lomba_mentah):
-        print("\n--- Menghubungi AI untuk menstrukturkan data (Cara Terbaru)... ---")
+        logger.info("\n--- Menghubungi AI untuk menstrukturkan data (Cara Terbaru)... ---")
         
         if self.current_model_index >= len(self.MODEL_LIST):
-            print("❌ Semua model telah mencapai rate limit. Tidak bisa memproses batch ini.")
+            logger.error("❌ Semua model telah mencapai rate limit. Tidak bisa memproses batch ini.")
             return None
 
         current_model_name = self.MODEL_LIST[self.current_model_index]
-        print(f"\n--- Menghubungi AI (Mencoba Model: {current_model_name}) ---")
+        logger.info(f"\n--- Menghubungi AI (Mencoba Model: {current_model_name}) ---")
 
         prompt = self.get_batch_prompt(batch_lomba_mentah)
         
@@ -236,7 +247,7 @@ class BaseScraper(ABC):
                 
                 batch_data_terstruktur = json.loads(response.text)
                 
-                print(f"✅ AI berhasil menstrukturkan batch dengan model {current_model_name}.")
+                logger.info(f"✅ AI berhasil menstrukturkan batch dengan model {current_model_name}.")
                 client.close()
                 return batch_data_terstruktur
                 
@@ -244,16 +255,16 @@ class BaseScraper(ABC):
                 if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e) or "503" in str(e):
                     if attempt < max_retries_per_model - 1: # Cek jika ini bukan percobaan terakhir
                         wait_time = base_delay * (2 ** attempt)
-                        print(f"⚠️ API Error. Menunggu {wait_time} detik... (Percobaan {attempt + 1}/{max_retries_per_model})")
+                        logger.warning(f"⚠️ API Error. Menunggu {wait_time} detik... (Percobaan {attempt + 1}/{max_retries_per_model})")
                         time.sleep(wait_time)
                     else:
                         self.current_model_index += 1
                         # Jika ini percobaan terakhir, cetak pesan dan biarkan loop berakhir
-                        print(f"❌ Gagal total pada model '{current_model_name}'. Merotasi ke model berikutnya...")
+                        logger.warning(f"❌ Gagal total pada model '{current_model_name}'. Merotasi ke model berikutnya...")
                         return self.strukturkan_dengan_ai(batch_lomba_mentah)
                 else:
                     # Jika error lain, langsung keluar dan kembalikan None
-                    print(f"❌ Terjadi error tak terduga: {e}")
+                    logger.error(f"❌ Terjadi error tak terduga: {e}")
                     return None # Langsung return None, jangan break
         return None
 

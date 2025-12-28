@@ -1,4 +1,5 @@
-from .infolombait_scraper import InfolombaitScraper
+from .scrapers.infolombait_scraper import InfolombaitScraper
+from config.logging_config import logger
 
 def run_scrapers():
     scrapers_to_run = [
