@@ -7,8 +7,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DB_PATH = os.getenv('DB_PATH')
-
 def convert_to_id_date(value):
     if value is None:
         return "-"
@@ -24,17 +22,7 @@ def convert_to_id_date(value):
         return format_date(value, "d MMMM y", locale="id")
 
     return value
-
-def get_db_connection():
-    """Fungsi bantuan untuk membuat koneksi ke database."""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-def get_db_path():
-    return DB_PATH
-
-
+    
 def get_domain_from_url(url):
     """
     Mengekstrak nama domain bersih dari sebuah URL lengkap.
