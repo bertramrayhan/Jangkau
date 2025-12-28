@@ -7,11 +7,11 @@
 </p>
 
 <p align="center"> 
-  <a href="#live-website">Live Website</a> •
-  <a href="#screenshot">Screenshot</a> •
-  <a href="#fitur">Fitur</a> •
-  <a href="#instalasi">Instalasi</a> •
-  <a href="#kontribusi">Kontribusi</a>
+  <a href="#-live-website">Live Website</a> •
+  <a href="#️-screenshot">Screenshot</a> •
+  <a href="#-fitur">Fitur</a> •
+  <a href="#-instalasi">Instalasi</a> •
+  <a href="#-kontribusi">Kontribusi</a>
 </p>
 
 <p align="center">
@@ -26,19 +26,19 @@
 
 ## 📋 Daftar Isi
 
-- [Live Website](#live-website)
-- [Screenshot](#screenshot)
-- [Tentang Proyek](#tentang-proyek)
-- [Fitur](#fitur)
-- [Teknologi](#teknologi)
-- [Struktur Proyek](#struktur-proyek)
-- [Instalasi](#instalasi)
-- [Penggunaan](#penggunaan)
-- [API & Database](#api--database)
-- [Scraper](#scraper)
-- [Deployment](#deployment)
-- [Kontribusi](#kontribusi)
-- [Lisensi](#lisensi)
+- [Live Website](#-live-website)
+- [Screenshot](#️-screenshot)
+- [Tentang Proyek](#-tentang-proyek)
+- [Fitur](#-fitur)
+- [Teknologi](#-teknologi)
+- [Struktur Proyek](#-struktur-proyek)
+- [Instalasi](#-instalasi)
+- [Penggunaan](#-penggunaan)
+- [API & Database](#-api--database)
+- [Scraper](#-scraper)
+- [Deployment](#-deployment)
+- [Kontribusi](#-kontribusi)
+- [Lisensi](#-lisensi)
 
 ## 🌐 Live Website
 
@@ -51,11 +51,11 @@ Platform sudah live dan dapat diakses secara langsung. Untuk development lokal, 
 ## 🖼️ Screenshot
 
 ### 🏠 Halaman Utama
-![Halaman Utama](https://raw.githubusercontent.com/bertramrayhan/Jangkau/assets/homepage.png)
+![Halaman Utama](https://github.com/bertramrayhan/Jangkau/blob/main/assets/homepage.png)
 *Tampilan halaman utama dengan fitur pencarian dan filter*
 
 ### 📋 Halaman Detail
-![Halaman Detail](https://raw.githubusercontent.com/bertramrayhan/Jangkau/assets/detail.png)
+![Halaman Detail](https://github.com/bertramrayhan/Jangkau/blob/main/assets/detail.png)
 *Tampilan detail lomba dengan informasi lengkap dan link pendaftaran*
 
 ---
