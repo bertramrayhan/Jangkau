@@ -28,7 +28,6 @@ def get_filtered_lomba(page, query_param, selected_tags, is_free, lokasi):
             Lomba.location_details.ilike(search_term),
             Lomba.organizer.ilike(search_term),
             # Tambahkan kolom lain di sini jika perlu
-            # Lomba.raw_description.ilike(search_term) 
 
             Lomba.tags.any(Tag.name.ilike(search_term))
         )
@@ -59,7 +58,7 @@ def index():
 
     is_free = None
     free_param = request.args.get('tipe_lomba')
-    if free_param is not "all" and free_param is not None:
+    if free_param != "all" and free_param is not None:
         # Convert string ke boolean
         is_free = free_param.lower() in ['true', '1', 'yes', 'on']
 

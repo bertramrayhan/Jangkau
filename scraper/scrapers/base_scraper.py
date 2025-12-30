@@ -1,7 +1,4 @@
-import os
-import sys
-import json
-import time
+import os, sys, json, time, bleach
 from abc import ABC, abstractmethod
 from datetime import datetime
 
@@ -22,7 +19,7 @@ class BaseScraper(ABC):
     HEADERS = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
-    BATCH_SIZE = 5
+    BATCH_SIZE = 3
     MODEL_LIST = [
         # --- Pilihan Utama (Cepat dan Cukup Cerdas) ---
         'models/gemini-flash-latest',
@@ -31,12 +28,25 @@ class BaseScraper(ABC):
         # --- Pilihan Kedua (Lebih Cerdas, Mungkin Sedikit Lebih Lambat) ---
         'models/gemini-pro-latest',
         'models/gemini-2.5-pro',
-        
-        # --- Pilihan Cadangan (Model Gemma, lebih kecil) ---
-        # Mungkin tidak seakurat Gemini, tapi patut dicoba jika yang lain gagal
-        'models/gemma-3-12b-it', 
-        'models/gemma-3-4b-it',
     ]
+    ALLOWED_TAGS = [
+        'h2', 'h3', 'h4', 'h5', 'h6',
+        'strong', 'b', # Tebal
+        'em', 'i',     # Miring
+        'u',          # Garis bawah
+        'strike', 's',# Coret
+        'ul', 'ol', 'li',
+        'p',          # Paragraf
+        'br',         # Baris baru
+        'a',          # Link
+        'blockquote', # Kutipan
+        'table', 'thead', 'tbody', 'tr', 'th', 'td' # Menambahkan dukungan untuk tabel
+    ]
+
+    ALLOWED_ATTRIBUTES = {
+        'a': ['href', 'title'],
+        'img': ['src', 'alt', 'title', 'width', 'height'], # Izinkan width/height untuk gambar
+    }
 
     def __init__(self):
         """
@@ -119,6 +129,21 @@ class BaseScraper(ABC):
                 session.close()
                 return
 
+            untrusted_html = data_terstruktur.get('content_html')
+
+            if untrusted_html:
+                logger.info("  -> Melakukan sanitasi HTML dengan bleach...")
+            
+                safe_html = bleach.clean(
+                    untrusted_html,
+                    tags=self.ALLOWED_TAGS,
+                    attributes=self.ALLOWED_ATTRIBUTES,
+                    strip=True
+                )
+                
+                data_terstruktur['content_html'] = safe_html
+                logger.info("  -> ✅ Sanitasi HTML selesai.")
+
             for col in Lomba.__table__.columns:
                 if isinstance(col.type, (Date, DateTime)):
                     col_name = col.name
@@ -130,8 +155,6 @@ class BaseScraper(ABC):
                         except ValueError:
                             logger.warning(f"⚠️ Peringatan: Format tanggal salah untuk '{col_name}': '{date_str}'. Menggunakan null.")
                             data_terstruktur[col_name] = None
-
-            data_terstruktur.pop('id_lomba_input')
 
             tags_from_ai = data_terstruktur.pop('tags', [])
 
@@ -162,46 +185,45 @@ class BaseScraper(ABC):
         batch_text_input = ""
 
         for lomba_mentah in batch_lomba_mentah:
-            batch_text_input += f"""
-            url : {lomba_mentah['url']}
-            Judul : {lomba_mentah['title']}
-            Deskrpsi : {lomba_mentah['description']}
-
-            --- LOMBA BARU ---
-
-
+            batch_text_input += f'''
+            SOURCE_URL: {lomba_mentah['source_url']}
+            TITLE: {lomba_mentah['title']}
+            CONTENT_HTML:
+            """
+            {lomba_mentah['content_html']}
             """
 
-        # Mengubah daftar tag menjadi string untuk dimasukkan ke dalam prompt
-        tags_string = ", ".join([f'"{tag_name}"' for tag_name in self.VALID_TAGS])
+            --- ITEM BARU ---
 
-        return f"""
-        PERAN: Anda adalah sebuah API pemrosesan batch yang sangat akurat. Tugas Anda adalah menerima serangkaian data acara, dan mengembalikan sebuah ARRAY JSON yang berisi hasil ekstraksi untuk SETIAP acara.
+            '''
 
-        INPUT:
-        Serangkaian data acara di bawah ini. Setiap acara dipisahkan oleh "--- LOMBA BARU ---".
-        ---
-        {batch_text_input}
-        ---
+        return f'''
+        PERAN:
+        Anda adalah sebuah API pemrosesan batch yang sangat akurat. Tugas Anda adalah menerima serangkaian data mentah berisi HTML, dan mengembalikan sebuah ARRAY JSON yang berisi hasil pemrosesan lengkap untuk SETIAP item.
 
-        TUGAS:
-        Untuk SETIAP acara dalam INPUT, ekstrak informasinya ke dalam sebuah objek JSON. Gabungkan semua objek JSON tersebut ke dalam sebuah ARRAY JSON tunggal.
+        TUGAS UTAMA (berlaku untuk setiap item input):
+        Lakukan proses dua langkah berikut secara internal:
+        1.  **LANGKAH 1: ANALISIS & PEMBERSIHAN HTML**
+            *   Ambil `CONTENT_HTML` mentah.
+            *   Hapus semua elemen "sampah" seperti `<script>`, `<style>`, iklan, `<div>` yang tidak perlu, dan atribut `style="..."` atau `class="..."`.
+            *   Dari HTML yang sudah dianalisis ini, buatlah versi `clean_html` yang siap ditampilkan, hanya menggunakan tag semantik seperti `<h2>`, `<h3>`, `<p>`, `<ul>`, `<li>`, `<strong>`, dan `<a>`.
+        2.  **LANGKAH 2: EKSTRAKSI INFORMASI**
+            *   Berdasarkan pemahaman Anda dari konten di Langkah 1, ekstrak semua informasi kunci lainnya sesuai ATURAN EKSTRAKSI di bawah.
 
-        ATURAN EKSTRAKSI (berlaku untuk setiap objek JSON):
-        1.  **`id_lomba_input`**: WAJIB diisi dengan nomor ID yang tertera di input untuk setiap lomba. Tipe datanya harus integer.
-        2.  **`title`**: WAJIB diisi dengan judul yang tertera di input untuk setiap lomba.
-        3.  **Format Tanggal**: Gunakan format `YYYY-MM-DD`. Jika tahun tidak ada, asumsikan `2025` atau `2026` berdasarkan konteks. Jika tidak ada info tanggal, gunakan `null`.
-        4.  **`is_free`**: Gunakan `true` jika teks menyebut 'GRATIS'/'FREE'. Gunakan `false` jika ada harga. Gunakan `null` jika tidak ada info biaya.
-        5.  **`tags`**: Pilih beberapa tag yang paling relevan HANYA dari daftar berikut: [{tags_string}].
-        6.  **`registration_link`**: Prioritaskan link dari platform seperti 'linktr.ee', 'bit.ly', atau yang mengandung kata 'daftar'/'register'. Jika tidak ada, gunakan `null`.
-        7.  **Nilai `null`**: Untuk field lain, jika informasinya tidak dapat ditemukan, WAJIB gunakan nilai `null`.
+        ATURAN EKSTRAKSI (berlaku untuk Langkah 2):
+        1.  **`title`**: WAJIB diisi dengan judul yang tertera di input untuk setiap lomba.
+        2.  **Format Tanggal**: Gunakan format `YYYY-MM-DD`. Jika tahun tidak ada, asumsikan `2025` atau `2026` berdasarkan konteks. Jika tidak ada info tanggal, gunakan `null`.
+        3.  **`is_free`**: Gunakan `true` jika teks menyebut 'GRATIS'/'FREE'. Gunakan `false` jika ada harga. Gunakan `null` jika tidak ada info biaya.
+        4.  **`tags`**: Pilih beberapa tag yang paling relevan HANYA dari daftar berikut: [{self.VALID_TAGS}].
+        5.  **`registration_link`**: Prioritaskan link dari platform seperti 'linktr.ee', 'bit.ly', atau yang mengandung kata 'daftar'/'register'. Jika tidak ada, gunakan `null`.
+        6.  **Nilai `null`**: Untuk field lain, jika informasinya tidak dapat ditemukan, WAJIB gunakan nilai `null`.
+        7.  **`price_details`**: Jika `is_free` true maka price_details null. Jika tidak tertera adanya biaya pendaftaran, maka isilah dengan null.
 
         STRUKTUR WAJIB UNTUK SETIAP OBJEK JSON:
         {{
-        "id_lomba_input": integer,
         "title": "string",
-        "source_url": salin url pada lomba,
-        "raw_description": salin deskripsi pada lomba,
+        "source_url": "salin url pada lomba",
+        "content_html": "HTML bersih dari LANGKAH 1.",
         "organizer": "string atau null",
         "registration_start": "YYYY-MM-DD atau null",
         "registration_end": "YYYY-MM-DD atau null",
@@ -215,9 +237,51 @@ class BaseScraper(ABC):
         "registration_link": "string (URL) atau null"
         }}
 
+        INPUT:
+        Serangkaian data acara di bawah ini. Setiap acara dipisahkan oleh "--- LOMBA BARU ---".
+        ---
+        {batch_text_input}
+        ---
+
         ATURAN OUTPUT FINAL:
         Respons Anda HARUS HANYA berisi array JSON `[...]` yang valid. Jangan sertakan teks pembuka, penutup, markdown (```json), atau penjelasan apa pun.
+        '''
+
+    def filter_existing_competitions(self, batch_lomba_mentah):
         """
+        Filter out competitions that already exist in the database based on source_url.
+        Returns only new competitions that need to be processed.
+        """
+        if not batch_lomba_mentah:
+            logger.warning("⚠️ Batch kosong, tidak ada yang perlu difilter.")
+            return []
+        
+        session = self.Session()
+        new_competitions = []
+        
+        try:
+            for lomba in batch_lomba_mentah:
+                if not lomba or not lomba.get('source_url'):
+                    logger.warning("⚠️ Data lomba tidak valid atau tidak memiliki source_url, dilewati.")
+                    continue
+                
+                source_url = lomba.get('source_url')
+                existing_lomba = session.query(Lomba).filter_by(source_url=source_url).first()
+                
+                if existing_lomba:
+                    logger.info(f"ℹ️ Lomba '{lomba.get('title', 'Tanpa Judul')}' sudah ada di database (ID: {existing_lomba.id}). Dilewati dari proses AI.")
+                else:
+                    new_competitions.append(lomba)
+                    logger.info(f"✅ Lomba '{lomba.get('title', 'Tanpa Judul')}' belum ada di database, akan diproses AI.")
+            
+            logger.info(f"📊 Hasil filtering: {len(new_competitions)} lomba baru dari {len(batch_lomba_mentah)} total lomba.")
+            return new_competitions
+            
+        except Exception as e:
+            logger.error(f"❌ Terjadi error saat filtering lomba: {e}")
+            return batch_lomba_mentah  # Return original batch if filtering fails
+        finally:
+            session.close()
 
     def strukturkan_dengan_ai(self, batch_lomba_mentah):
         logger.info("\n--- Menghubungi AI untuk menstrukturkan data (Cara Terbaru)... ---")

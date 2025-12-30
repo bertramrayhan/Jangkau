@@ -295,7 +295,7 @@ python main.py
 - id (Primary Key)
 - title (String, Not Null)
 - source_url (String, Unique, Not Null) 
-- raw_description (Text)
+- content_html (Text)
 - organizer (String)
 - registration_start (Date)
 - registration_end (Date) 

@@ -5,6 +5,7 @@ import re
 from bs4 import BeautifulSoup
 from urllib.parse import quote_plus
 from .base_scraper import BaseScraper
+from config.logging_config import logger
 
 class InfolombaitScraper(BaseScraper):
     base_url = 'https://www.infolombait.com/'
@@ -14,11 +15,11 @@ class InfolombaitScraper(BaseScraper):
         self.max_page = max_page
 
     def traverse_url(self, title, url):
-        print(f"Mengambil deskripsi lomba dari satu halaman: {url}" )
+        logger.info(f"Mengambil content lomba dari satu halaman: {url}" )
 
         data_lomba = {
             'title': title,
-            'url': url
+            'source_url': url
         }
 
         try:
@@ -27,51 +28,30 @@ class InfolombaitScraper(BaseScraper):
 
             soup = BeautifulSoup(response.text, 'html.parser')
 
-            deskripsi_lomba_scope = soup.select_one('div.entry-content')
+            content_lomba_scope = soup.select_one('div.entry-content')
 
-            if deskripsi_lomba_scope:
-                print(f"\n✅ Berhasil menemukan deskripsi lomba:")
+            if content_lomba_scope:
+                logger.info(f"\n✅ Berhasil menemukan content lomba:")
 
-                deskripsi_lomba_tags = deskripsi_lomba_scope.select('p')
-                print(f"\n--- Memulai Investigasi {len(deskripsi_lomba_tags)} Paragraf ---")
+                data_lomba['content_html'] = content_lomba_scope.decode_contents()
 
-                final_description_parts = []
-
-                for i, p_tag in enumerate(deskripsi_lomba_tags):
-                    
-                    text = ''
-
-                    if not p_tag.get_text(strip=True):
-                        final_description_parts.append('\n') 
-                        continue
-                    else:
-                        text = p_tag.get_text(strip=True)
-                        final_description_parts.append(text)
-
-                    final_description_parts.append('\n') 
-
-                deskripsi_lomba = ''.join(final_description_parts)
-
-                deskripsi_lomba_bersih = re.sub(r'\n{3,}', '\n\n', deskripsi_lomba)
-
-                data_lomba['description'] = deskripsi_lomba_bersih
                 return data_lomba
             else:
-                print("\n❌ Gagal menemukan deskripsi lomba dengan selector yang digunakan.")
-                print("    Mungkin struktur HTML situs telah berubah. Perlu investigasi ulang.")
+                logger.error("\n❌ Gagal menemukan deskripsi lomba dengan selector yang digunakan.")
+                logger.error("    Mungkin struktur HTML situs telah berubah. Perlu investigasi ulang.")
 
         except requests.exceptions.RequestException as e:
-            print(f"\n❌ Gagal melakukan request ke URL. Error: {e}")
+            logger.error(f"\n❌ Gagal melakukan request ke URL. Error: {e}")
         except Exception as e:
-            print(f"\n❌ Terjadi sebuah error: {e}")
+            logger.error(f"\n❌ Terjadi sebuah error: {e}")
 
     def scrape(self):
-        print(f"Mengambil daftar lomba dari halaman utama: {self.base_url}" )
+        logger.info(f"Mengambil daftar lomba dari halaman utama: {self.base_url}" )
 
         page_count = 0
         next_page_url = self.base_url
         while page_count < self.max_page:
-            print(f"\n------HALAMAN {page_count + 1}------\n")
+            logger.info(f"\n------HALAMAN {page_count + 1}------\n")
             lomba_terakhir = None
             try:
                 response = requests.get(next_page_url, headers=self.HEADERS, timeout=15)
@@ -87,7 +67,7 @@ class InfolombaitScraper(BaseScraper):
                     else:
                         lomba_terakhir = list_lomba[-1]
 
-                    print(f"\n✅ Berhasil menemukan {len(list_lomba)} lomba:")
+                    logger.info(f"\n✅ Berhasil menemukan {len(list_lomba)} lomba:")
                     
                     batch_lomba_mentah = []
 
@@ -97,35 +77,42 @@ class InfolombaitScraper(BaseScraper):
                         lomba_title = lomba_url_tag.text.strip()
                         lomba_url = lomba_url_tag['href'];
 
-                        print(f"  - Judul: {lomba_title}")
-                        print(f"    Link: {lomba_url}")
+                        logger.info(f"  - Judul: {lomba_title}")
+                        logger.info(f"    Link: {lomba_url}")
 
                         data_mentah = self.traverse_url(lomba_title, lomba_url)
-                        batch_lomba_mentah.append(data_mentah)
+                        if data_mentah:  # Only add if data was successfully retrieved
+                            batch_lomba_mentah.append(data_mentah)
                         time.sleep(1.5)
 
-                    for i in range(0, len(batch_lomba_mentah), self.BATCH_SIZE):
-                        current_batch = batch_lomba_mentah[i:i + self.BATCH_SIZE]
+                    # Filter out competitions that already exist in database
+                    filtered_batch = self.filter_existing_competitions(batch_lomba_mentah)
+                    
+                    if not filtered_batch:
+                        logger.info("✅ Semua lomba dalam batch sudah ada di database. Melanjutkan ke halaman berikutnya.")
+                    else:
+                        for i in range(0, len(filtered_batch), self.BATCH_SIZE):
+                            current_batch = filtered_batch[i:i + self.BATCH_SIZE]
 
-                        batch_data_terstruktur = self.strukturkan_dengan_ai(current_batch)
-                        
-                        if batch_data_terstruktur:
-                            for data_terstruktur in batch_data_terstruktur:
-                                if data_terstruktur:
-                                    print(json.dumps(data_terstruktur, indent=2, ensure_ascii=False))
+                            batch_data_terstruktur = self.strukturkan_dengan_ai(current_batch)
+                            
+                            if batch_data_terstruktur:
+                                for data_terstruktur in batch_data_terstruktur:
+                                    if data_terstruktur:
+                                        logger.info(json.dumps(data_terstruktur, indent=2, ensure_ascii=False))
 
-                                    self.simpan_ke_db(data_terstruktur)
-                        else:
-                            print("⚠️ Panggilan AI gagal tanpa error spesifik, mencoba lagi...")
+                                        self.simpan_ke_db(data_terstruktur)
+                            else:
+                                logger.warning("⚠️ Panggilan AI gagal tanpa error spesifik, mencoba lagi...")
                     
                 else:
-                    print("\n❌ Gagal menemukan link lomba dengan selector yang digunakan.")
-                    print("    Mungkin struktur HTML situs telah berubah. Perlu investigasi ulang.")
+                    logger.error("\n❌ Gagal menemukan link lomba dengan selector yang digunakan.")
+                    logger.error("    Mungkin struktur HTML situs telah berubah. Perlu investigasi ulang.")
 
             except requests.exceptions.RequestException as e:
-                print(f"\n❌ Gagal melakukan request ke URL. Error: {e}")
+                logger.error(f"\n❌ Gagal melakukan request ke URL. Error: {e}")
             except Exception as e:
-                print(f"\n❌ Terjadi sebuah error: {e}")
+                logger.error(f"\n❌ Terjadi sebuah error: {e}")
             finally:
 
                 page_count += 1
@@ -139,8 +126,8 @@ class InfolombaitScraper(BaseScraper):
                     encoded_timestamp = quote_plus(last_timestamp)
                     
                     next_page_url = f"https://www.infolombait.com/search?updated-max={encoded_timestamp}&max-results=6#PageNo={page_count + 1}"
-                    print(f"\n--- Halaman berikutnya ditemukan: {next_page_url} ---" )
+                    logger.info(f"\n--- Halaman berikutnya ditemukan: {next_page_url} ---" )
 
                 else:
-                    print("\n--- Tidak ada lagi halaman berikutnya. Proses selesai. ---")
+                    logger.info("\n--- Tidak ada lagi halaman berikutnya. Proses selesai. ---")
                     break # Keluar dari loop 'while True:'
