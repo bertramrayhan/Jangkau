@@ -1,5 +1,4 @@
-
-import os
+import os, json
 
 from models import Base, Tag, get_engine_and_session
 
@@ -7,11 +6,20 @@ DB_FILENAME = "jangkau.db"
 DB_PATH = os.path.join(os.path.dirname(__file__), DB_FILENAME)
 DATABASE_URL = f"sqlite:///{DB_PATH}"
 
-INITIAL_TAGS = [
-    "Programming", "Hackathon", "CTF", "Data Science", "UI/UX Design", 
-    "Desain Grafis", "Business Case", "Debat", "Menulis Esai", "Robotika", 
-    "Mahasiswa", "SMA", "Umum"
-]
+TAGS_FILE_PATH = os.path.join(os.path.dirname(__file__), 'tags.json')
+
+def load_initial_tags():
+    """Membaca daftar tag dari file tags.json."""
+    try:
+        with open(TAGS_FILE_PATH, 'r', encoding='utf-8') as f:
+            tags = json.load(f)
+        return tags
+    except FileNotFoundError:
+        print(f"❌ Error: File '{TAGS_FILE_PATH}' tidak ditemukan.")
+        return []
+    except json.JSONDecodeError:
+        print(f"❌ Error: Gagal mem-parsing JSON dari '{TAGS_FILE_PATH}'. Pastikan formatnya benar.")
+        return []
 
 def initialize_local_database():
     """
@@ -19,6 +27,12 @@ def initialize_local_database():
     Menghapus database lama jika ada untuk memastikan skema terbaru.
     """
     print("--- Local Database Initializer & Seeder ---")
+
+    INITIAL_TAGS = load_initial_tags()
+
+    if not INITIAL_TAGS:
+        print("⚠️ Tidak ada tag awal untuk dimuat. Proses inisialisasi tag dilewati.")
+        return
 
     if os.path.exists(DB_PATH):
         print(f"⚠️ Found existing database at '{DB_PATH}'. Deleting it to ensure a fresh schema.")

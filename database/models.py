@@ -19,7 +19,7 @@ class Lomba(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
     source_url = Column(String, nullable=False, unique=True)
-    raw_description = Column(Text)
+    content_html = Column(Text)
     organizer = Column(String)
     registration_start = Column(Date)
     registration_end = Column(Date)

@@ -16,7 +16,7 @@ class Lomba(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False)
     source_url = db.Column(db.String, nullable=False, unique=True)
-    raw_description = db.Column(db.Text)
+    content_html = db.Column(db.Text)
     organizer = db.Column(db.String)
     registration_start = db.Column(db.Date)
     registration_end = db.Column(db.Date)
