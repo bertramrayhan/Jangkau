@@ -94,7 +94,7 @@ class InfolombaitScraper(BaseScraper):
                         for i in range(0, len(filtered_batch), self.BATCH_SIZE):
                             current_batch = filtered_batch[i:i + self.BATCH_SIZE]
 
-                            batch_data_terstruktur = self.strukturkan_dengan_ai(current_batch)
+                            batch_data_terstruktur = self.AI_MANAGER.process(self.VALID_TAGS, current_batch)
                             
                             if batch_data_terstruktur:
                                 for data_terstruktur in batch_data_terstruktur:

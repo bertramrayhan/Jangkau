@@ -4,7 +4,7 @@ from config.logging_config import logger
 
 def run_scrapers():
     scrapers_to_run = [
-        InfolombaitScraper(6),
+        InfolombaitScraper(1),
         InformasilombaScraper(1, 40)
     ]
 

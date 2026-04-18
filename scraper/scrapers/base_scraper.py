@@ -3,8 +3,6 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
 from sqlalchemy import Date, DateTime
 from config.logging_config import logger
 
@@ -14,21 +12,13 @@ root_dir = os.path.abspath(os.path.join(current_dir, '..', '..'))
 sys.path.append(root_dir)
 
 from database.models import Lomba, Tag, get_engine_and_session
+from scraper.ai.manager import AIManager
 
 class BaseScraper(ABC):
     HEADERS = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
     BATCH_SIZE = 3
-    MODEL_LIST = [
-        # --- Pilihan Utama (Cepat dan Cukup Cerdas) ---
-        'models/gemini-flash-latest',
-        'models/gemini-2.5-flash',
-        
-        # --- Pilihan Kedua (Lebih Cerdas, Mungkin Sedikit Lebih Lambat) ---
-        'models/gemini-pro-latest',
-        'models/gemini-2.5-pro',
-    ]
     ALLOWED_TAGS = [
         'h2', 'h3', 'h4', 'h5', 'h6',
         'strong', 'b', # Tebal
@@ -48,14 +38,13 @@ class BaseScraper(ABC):
         'img': ['src', 'alt', 'title', 'width', 'height'], # Izinkan width/height untuk gambar
     }
 
+    AI_MANAGER = AIManager()
+
     def __init__(self):
         """
         Konstruktor umum yang menangani koneksi database dan konfigurasi AI.
         """
         load_dotenv()
-
-        # State dinamis yang unik untuk setiap instance
-        self.current_model_index = 0
         
         # --- Konfigurasi Database ---
         APP_ENV = os.getenv('APP_ENV', 'development').lower()
@@ -181,72 +170,6 @@ class BaseScraper(ABC):
         finally:
             session.close()
 
-    def get_batch_prompt(self, batch_lomba_mentah):
-        batch_text_input = ""
-
-        for lomba_mentah in batch_lomba_mentah:
-            batch_text_input += f'''
-            SOURCE_URL: {lomba_mentah['source_url']}
-            TITLE: {lomba_mentah['title']}
-            CONTENT_HTML:
-            """
-            {lomba_mentah['content_html']}
-            """
-
-            --- ITEM BARU ---
-
-            '''
-
-        return f'''
-        PERAN:
-        Anda adalah sebuah API pemrosesan batch yang sangat akurat. Tugas Anda adalah menerima serangkaian data mentah berisi HTML, dan mengembalikan sebuah ARRAY JSON yang berisi hasil pemrosesan lengkap untuk SETIAP item.
-
-        TUGAS UTAMA (berlaku untuk setiap item input):
-        Lakukan proses dua langkah berikut secara internal:
-        1.  **LANGKAH 1: ANALISIS & PEMBERSIHAN HTML**
-            *   Ambil `CONTENT_HTML` mentah.
-            *   Hapus semua elemen "sampah" seperti `<script>`, `<style>`, iklan, `<div>` yang tidak perlu, dan atribut `style="..."` atau `class="..."`.
-            *   Dari HTML yang sudah dianalisis ini, buatlah versi `clean_html` yang siap ditampilkan, hanya menggunakan tag semantik seperti `<h2>`, `<h3>`, `<p>`, `<ul>`, `<li>`, `<strong>`, dan `<a>`.
-        2.  **LANGKAH 2: EKSTRAKSI INFORMASI**
-            *   Berdasarkan pemahaman Anda dari konten di Langkah 1, ekstrak semua informasi kunci lainnya sesuai ATURAN EKSTRAKSI di bawah.
-
-        ATURAN EKSTRAKSI (berlaku untuk Langkah 2):
-        1.  **`title`**: WAJIB diisi dengan judul yang tertera di input untuk setiap lomba.
-        2.  **Format Tanggal**: Gunakan format `YYYY-MM-DD`. Jika tahun tidak ada, asumsikan `2025` atau `2026` berdasarkan konteks. Jika tidak ada info tanggal, gunakan `null`.
-        3.  **`is_free`**: Gunakan `true` jika teks menyebut 'GRATIS'/'FREE'. Gunakan `false` jika ada harga. Gunakan `null` jika tidak ada info biaya.
-        4.  **`tags`**: Pilih beberapa tag yang paling relevan HANYA dari daftar berikut: [{self.VALID_TAGS}].
-        5.  **`registration_link`**: Prioritaskan link dari platform seperti 'linktr.ee', 'bit.ly', atau yang mengandung kata 'daftar'/'register'. Jika tidak ada, gunakan `null`.
-        6.  **Nilai `null`**: Untuk field lain, jika informasinya tidak dapat ditemukan, WAJIB gunakan nilai `null`.
-        7.  **`price_details`**: Jika `is_free` true maka price_details null. Jika tidak tertera adanya biaya pendaftaran, maka isilah dengan null.
-
-        STRUKTUR WAJIB UNTUK SETIAP OBJEK JSON:
-        {{
-        "title": "string",
-        "source_url": "salin url pada lomba",
-        "content_html": "HTML bersih dari LANGKAH 1.",
-        "organizer": "string atau null",
-        "registration_start": "YYYY-MM-DD atau null",
-        "registration_end": "YYYY-MM-DD atau null",
-        "event_start": "YYYY-MM-DD atau null",
-        "event_end": "YYYY-MM-DD atau null",
-        "is_free": boolean atau null,
-        "price_details": "string atau null",
-        "location": "string ('Online', 'Offline', 'Hybrid') atau null",
-        "location_details": "string atau null",
-        "tags": ["array", "of", "strings"],
-        "registration_link": "string (URL) atau null"
-        }}
-
-        INPUT:
-        Serangkaian data acara di bawah ini. Setiap acara dipisahkan oleh "--- LOMBA BARU ---".
-        ---
-        {batch_text_input}
-        ---
-
-        ATURAN OUTPUT FINAL:
-        Respons Anda HARUS HANYA berisi array JSON `[...]` yang valid. Jangan sertakan teks pembuka, penutup, markdown (```json), atau penjelasan apa pun.
-        '''
-
     def filter_existing_competitions(self, batch_lomba_mentah):
         """
         Filter out competitions that already exist in the database based on source_url.
@@ -282,55 +205,6 @@ class BaseScraper(ABC):
             return batch_lomba_mentah  # Return original batch if filtering fails
         finally:
             session.close()
-
-    def strukturkan_dengan_ai(self, batch_lomba_mentah):
-        logger.info("\n--- Menghubungi AI untuk menstrukturkan data (Cara Terbaru)... ---")
-        
-        if self.current_model_index >= len(self.MODEL_LIST):
-            logger.error("❌ Semua model telah mencapai rate limit. Tidak bisa memproses batch ini.")
-            return None
-
-        current_model_name = self.MODEL_LIST[self.current_model_index]
-        logger.info(f"\n--- Menghubungi AI (Mencoba Model: {current_model_name}) ---")
-
-        prompt = self.get_batch_prompt(batch_lomba_mentah)
-        
-        max_retries_per_model = 5
-        base_delay = 5
-        for attempt in range(max_retries_per_model):
-            try:
-                client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
-
-                response = client.models.generate_content(
-                    model= current_model_name,
-                    contents= prompt,
-                    config= types.GenerateContentConfig(
-                        response_mime_type='application/json'
-                    )
-                )
-                
-                batch_data_terstruktur = json.loads(response.text)
-                
-                logger.info(f"✅ AI berhasil menstrukturkan batch dengan model {current_model_name}.")
-                client.close()
-                return batch_data_terstruktur
-                
-            except Exception as e:
-                if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e) or "503" in str(e):
-                    if attempt < max_retries_per_model - 1: # Cek jika ini bukan percobaan terakhir
-                        wait_time = base_delay * (2 ** attempt)
-                        logger.warning(f"⚠️ API Error. Menunggu {wait_time} detik... (Percobaan {attempt + 1}/{max_retries_per_model})")
-                        time.sleep(wait_time)
-                    else:
-                        self.current_model_index += 1
-                        # Jika ini percobaan terakhir, cetak pesan dan biarkan loop berakhir
-                        logger.warning(f"❌ Gagal total pada model '{current_model_name}'. Merotasi ke model berikutnya...")
-                        return self.strukturkan_dengan_ai(batch_lomba_mentah)
-                else:
-                    # Jika error lain, langsung keluar dan kembalikan None
-                    logger.error(f"❌ Terjadi error tak terduga: {e}")
-                    return None # Langsung return None, jangan break
-        return None
 
     # --- Metode dan properti Abstrak (Wajib diimplementasikan oleh anak) ---
 
